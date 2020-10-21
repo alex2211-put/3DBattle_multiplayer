@@ -3,7 +3,6 @@ from random import randint
 
 
 '''
-1) Написать окончание игры, удаляя игроков из пар (удаляя пары).
 2) Написать окончание игры, когда один из игроков решил выйти из игры по своему желанию.
 3) Написать повторное подключение игрока к серверу по причине локального вылета из игры.
 4) Написать восстановление сервера при его неожиданном падении (файл, где хранятся действующие игры).
@@ -46,6 +45,7 @@ class ClientServerProtocol(asyncio.Protocol):
 
     def data_received(self, data):
         data = (data.decode('utf-8')).split()
+
         if data[0] in self.everything:
             if data[1] == 'ready':
                 self.ready_func(data)
@@ -67,39 +67,45 @@ class ClientServerProtocol(asyncio.Protocol):
             elif data[1] == 'when':   # клиент в ожидании начала боя
                 if self.everything[data[0]][1] == 'fire':
                     self.everything[data[0]][0].write("started\n".encode())
-                    # print('написал started')
                     self.everything[data[0]][0].write(str(1).encode())
                 elif self.everything[data[0]][1] == 'wait':
                     self.everything[data[0]][0].write("started\n".encode())
-                    # print('написал started')
                     self.everything[data[0]][0].write(str(0).encode())
                 else:
                     self.everything[data[0]][0].write("no\n".encode())
 
         else:
+            print(data)
             print('Такого ключа нет в словаре!!!')
+
 
     def ready_func(self, data):
         to_pair = False  # смотрим, дополнилось ли к паре
+        empty = False   # смотрим на наличие просто пустых мест
         count = -1  # номер пары
         self.everything[data[0]].append(data[1])  # ready в словарь
         # сделан трехмерный массив для карты...
-        length_cube = int(data[len(data) - 1])
+        LengthBigCube = int(data[len(data) - 1])
         count_map = 2
-        battle_map = [[[0 for _ in range(length_cube)] for _ in range(length_cube)] for _ in range(length_cube)]
-        for i in range(length_cube):
-            for j in range(length_cube):
-                for k in range(length_cube):
+        battle_map = [[[0 for _ in range(LengthBigCube)] for _ in range(LengthBigCube)] for _ in range(LengthBigCube)]
+        for i in range(LengthBigCube):
+            for j in range(LengthBigCube):
+                for k in range(LengthBigCube):
                     battle_map[i][j][k] = data[count_map]
                     count_map += 1
         self.everything[data[0]].append(battle_map)  # карта в словарь
 
-        self.everything[data[0]].append(length_cube)  # размер поля в словарь
+        self.everything[data[0]].append(LengthBigCube)  # размер поля в словарь
 
         for i in self.pairs:
             count += 1
-            if not len(i) == 2:
-                if self.everything[i[0]][3] == length_cube:  # сверяем размер карты
+            if len(i) == 0:
+                i.append(data[0])
+                self.everything[data[0]].append((count, 0))
+                self.everything[data[0]][1] = 'ready'
+                empty = True
+            elif not len(i) == 2:
+                if self.everything[i[0]][3] == LengthBigCube:  # сверяем размер карты
                     i.append(data[0])
                     to_pair = True
                     self.everything[data[0]].append((count, 1))  # добавляем в словарь тапл с парой
@@ -113,12 +119,12 @@ class ClientServerProtocol(asyncio.Protocol):
                         self.everything[i[0]][1] = 'fire'
                     self.everything[i[0]][0].write(str(1 - who).encode())  # отпраляем ходит он первый или нет
 
-        if not to_pair:
+        if not to_pair and not empty:
             self.pairs.append([data[0]])
             self.everything[data[0]].append((len(self.pairs) - 1, 0))
             self.everything[data[0]][1] = 'ready'
-        ships = (1 + length_cube - 2) * (
-                    length_cube - 2) / 2  # подсчитаем арифметической прогрессией число кораблей
+        ships = (1 + LengthBigCube - 2) * (
+                    LengthBigCube - 2) / 2  # подсчитаем арифметической прогрессией число кораблей
         self.everything[data[0]].append(ships)  # число кораблей в словарь
         self.everything[data[0]][0].write('ok'.encode())
 
@@ -131,8 +137,6 @@ class ClientServerProtocol(asyncio.Protocol):
         if int(self.everything[hash_with_who][2][self.where[0]][self.where[1]][self.where[2]]) == 1:  # если попали
             self.everything[hash_with_who][2][self.where[0]][self.where[1]][self.where[2]] = 4
             self.everything[hash_with_who][1] = 'hurt'  # меняем статус на "попали"
-
-            """<---написать локально жадный алгоритм !!!!!!!!!!!! проверка УБИЛИ  или ПОДБИЛИ !!!!!!!!!!!--->"""
 
             hit = True  # проверяем, жив корабль или убит
             where_ = [int(data[2]), int(data[3]), int(data[4])]
@@ -173,6 +177,7 @@ class ClientServerProtocol(asyncio.Protocol):
                 where_[2] += 1
 
             if hit:  # если корабль убит
+                print(self.everything[hash_with_who])
                 self.everything[hash_with_who][5] -= 1
                 if self.everything[hash_with_who][5] == 0:  # если у противника закончились корабли
                     self.everything[data[0]][0].write("win".encode())  # отправляем - ты выиграл
@@ -196,6 +201,11 @@ class ClientServerProtocol(asyncio.Protocol):
             self.everything[data[0]][0].write("hurt".encode())
         elif self.everything[data[0]][1] == 'fail':
             self.everything[data[0]][0].write("fail".encode())
+            hash_with_who = self.pairs[self.everything[data[0]][4][0]][1 - self.everything[data[0]][4][1]]
+            del self.everything[hash_with_who]
+            self.pairs[self.everything[data[0]][4][0]] = []
+            del self.everything[data[0]]
+
         elif self.everything[data[0]][1] == 'kill':
             self.everything[data[0]][0].write('kill'.encode())
         else:
