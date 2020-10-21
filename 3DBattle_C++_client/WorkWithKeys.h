@@ -41,6 +41,7 @@ void Keyboard(unsigned char key, int x, int y)
                     authors = true;
                     menupuncts[3] = false;
                 } else {
+                    sendServ(s, "end");
                     close(s);
                     fs::remove_all(filename);
                     exit(0);
@@ -49,10 +50,9 @@ void Keyboard(unsigned char key, int x, int y)
             }
         }
     }
-    if(key == 13 && (end1 || end2))
+    if(key == 13 && (end1 || end2 || end3))
     {
         close(s);
-        // std::cout << "end";   /// тут надо будет отправлять на сервер, чтобы выкидывало из пар
         fs::remove_all(filename);
         exit(0);
     }

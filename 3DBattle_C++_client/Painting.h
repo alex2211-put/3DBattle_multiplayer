@@ -64,6 +64,9 @@ void displayCell()
     } else if (end2)
     {
         end2Function();
+    } else if (end3)
+    {
+        end3Function();
     } else if (rules)
     {
         rulesFunction();

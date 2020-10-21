@@ -1,9 +1,7 @@
 import asyncio
 from random import randint
 
-
 '''
-2) Написать окончание игры, когда один из игроков решил выйти из игры по своему желанию.
 3) Написать повторное подключение игрока к серверу по причине локального вылета из игры.
 4) Написать восстановление сервера при его неожиданном падении (файл, где хранятся действующие игры).
 5) Написать историю игр (*)
@@ -35,13 +33,13 @@ class ClientServerProtocol(asyncio.Protocol):
     # 6 число - число оставшихся кораблей
     pairs = []
     new_pair_num = [0]
-    where = [0, 0, 0]
+    where = [-1, -1, -1]
 
     def connection_made(self, transport):
         self.transport = transport
-        answer = str(transport.__hash__()) + '\n'   # записываем хэш пришедшего подключения
-        self.everything[str(transport.__hash__())] = [transport]   # создаем ключ с таким хэшом и кидаем связь
-        self.transport.write(answer.encode())   # отпраляем хэш обратно
+        answer = str(transport.__hash__()) + '\n'  # записываем хэш пришедшего подключения
+        self.everything[str(transport.__hash__())] = [transport]  # создаем ключ с таким хэшом и кидаем связь
+        self.transport.write(answer.encode())  # отпраляем хэш обратно
 
     def data_received(self, data):
         data = (data.decode('utf-8')).split()
@@ -50,22 +48,26 @@ class ClientServerProtocol(asyncio.Protocol):
             if data[1] == 'ready':
                 self.ready_func(data)
 
-            elif data[1] == 'fire':   # клиент стреляет по противнику
+            elif data[1] == 'fire':  # клиент стреляет по противнику
                 self.fire_func(data)
 
-            elif data[1] == '?':   # стучимся в сервер в ожидании начала стрельбы (когда игра идет)
+            elif data[1] == '?':  # стучимся в сервер в ожидании начала стрельбы (когда игра идет)
                 self.waiting_func(data)
 
-            elif data[1] == "x" or data[1] == 'kill_sec':   # клиент ждет координат своего подбитого корабля
+            elif (data[1] == "x" or data[1] == 'kill_sec'):  # клиент
+                # ждет координат своего подбитого корабля
                 self.everything[data[0]][0].write(
                     (str(self.where[0]) + ' ' + str(self.where[1]) + ' ' + str(self.where[2])).encode())
                 self.everything[data[0]][1] = 'wait'
 
-            elif data[1] == 'hurt':   # клиент ждет координат своего промазанного поля (какой закрасить синим)
-                self.everything[data[0]][0].write((str(self.where[0]) + ' ' + str(self.where[1]) + ' ' + str(self.where[2])).encode())
+            elif data[1] == 'hurt':  # клиент ждет
+                # координат своего промазанного поля (какой закрасить синим)
+                print('hurt')
+                self.everything[data[0]][0].write(
+                    (str(self.where[0]) + ' ' + str(self.where[1]) + ' ' + str(self.where[2])).encode())
 
-            elif data[1] == 'when':   # клиент в ожидании начала боя
-                if self.everything[data[0]][1] == 'fire':
+            elif data[1] == 'when':  # клиент в ожидании начала боя
+                if self.everything[data[0]][1] == 'fire_st':
                     self.everything[data[0]][0].write("started\n".encode())
                     self.everything[data[0]][0].write(str(1).encode())
                 elif self.everything[data[0]][1] == 'wait':
@@ -74,14 +76,20 @@ class ClientServerProtocol(asyncio.Protocol):
                 else:
                     self.everything[data[0]][0].write("no\n".encode())
 
+            elif data[1] == 'end':  # окончание игры клиентом
+                try:
+                    hash_with_who = self.pairs[self.everything[data[0]][4][0]][1 - self.everything[data[0]][4][1]]
+                    self.everything[hash_with_who][1] = 'win'
+                except:
+                    pass
+
         else:
             print(data)
             print('Такого ключа нет в словаре!!!')
 
-
     def ready_func(self, data):
         to_pair = False  # смотрим, дополнилось ли к паре
-        empty = False   # смотрим на наличие просто пустых мест
+        empty = False  # смотрим на наличие просто пустых мест
         count = -1  # номер пары
         self.everything[data[0]].append(data[1])  # ready в словарь
         # сделан трехмерный массив для карты...
@@ -112,11 +120,11 @@ class ClientServerProtocol(asyncio.Protocol):
                     who = randint(0, 1)
                     self.everything[data[0]][0].write(str(who).encode())  # отправляем ходит он первый или нет
                     if who == 1:
-                        self.everything[data[0]][1] = 'fire'  # ставим статус что он стреляет
+                        self.everything[data[0]][1] = 'fire_st'  # ставим статус что он стреляет
                         self.everything[i[0]][1] = 'wait'  # ставим статус что он ждет
                     else:
                         self.everything[data[0]][1] = 'wait'
-                        self.everything[i[0]][1] = 'fire'
+                        self.everything[i[0]][1] = 'fire_st'
                     self.everything[i[0]][0].write(str(1 - who).encode())  # отпраляем ходит он первый или нет
 
         if not to_pair and not empty:
@@ -124,7 +132,7 @@ class ClientServerProtocol(asyncio.Protocol):
             self.everything[data[0]].append((len(self.pairs) - 1, 0))
             self.everything[data[0]][1] = 'ready'
         ships = (1 + LengthBigCube - 2) * (
-                    LengthBigCube - 2) / 2  # подсчитаем арифметической прогрессией число кораблей
+                LengthBigCube - 2) / 2  # подсчитаем арифметической прогрессией число кораблей
         self.everything[data[0]].append(ships)  # число кораблей в словарь
         self.everything[data[0]][0].write('ok'.encode())
 
@@ -177,7 +185,6 @@ class ClientServerProtocol(asyncio.Protocol):
                 where_[2] += 1
 
             if hit:  # если корабль убит
-                print(self.everything[hash_with_who])
                 self.everything[hash_with_who][5] -= 1
                 if self.everything[hash_with_who][5] == 0:  # если у противника закончились корабли
                     self.everything[data[0]][0].write("win".encode())  # отправляем - ты выиграл
@@ -195,12 +202,16 @@ class ClientServerProtocol(asyncio.Protocol):
             self.everything[hash_with_who][2][self.where[0]][self.where[1]][self.where[2]] = 3
 
     def waiting_func(self, data):
-        if self.everything[data[0]][1] == 'fire':  # если можно стрелять
+        if self.everything[data[0]][1] == 'fire_st':  # если можно стрелять
+            self.everything[data[0]][0].write("yes_st".encode())
+            self.everything[data[0]][1] = 'shoots'
+        elif self.everything[data[0]][1] == 'fire':  # если можно стрелять
             self.everything[data[0]][0].write("yes".encode())
+            self.everything[data[0]][1] = 'shoots'
         elif self.everything[data[0]][1] == 'hurt':  # если попали
             self.everything[data[0]][0].write("hurt".encode())
-        elif self.everything[data[0]][1] == 'fail':
-            self.everything[data[0]][0].write("fail".encode())
+        elif self.everything[data[0]][1] == 'fail' or self.everything[data[0]][1] == 'win':
+            self.everything[data[0]][0].write((self.everything[data[0]][1]).encode())
             hash_with_who = self.pairs[self.everything[data[0]][4][0]][1 - self.everything[data[0]][4][1]]
             del self.everything[hash_with_who]
             self.pairs[self.everything[data[0]][4][0]] = []

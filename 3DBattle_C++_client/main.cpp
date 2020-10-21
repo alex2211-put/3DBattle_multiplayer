@@ -6,7 +6,6 @@
 #include "WorkWithKeys.h"  //работа с клавиатурой
 #include "client.h"
 //много всего и всё служебное
-
 void Rotate(int value)
 {
     if(waiting_window)
@@ -23,10 +22,10 @@ void Rotate(int value)
         }
         //glutPostRedisplay();
     }
-    else if(isPlayer1 && forTwoPlayers == 2)   ///стреляем мы, в кубик справа, при этом это выражение false
+    else if(forTwoPlayers == 2)   ///стреляем мы, в кубик справа, при этом это выражение false
     {
         std::string t;
-        if (!end1 && !end2)
+        if (!end1 && !end2 && !end3)
         {
             sendServ(s, "?");
             t = readServ(s);
@@ -40,6 +39,11 @@ void Rotate(int value)
             int i, j, k;
             ss >> i >> j >> k;
             Player1[i][j][k].setIsHitten(3);
+            glutPostRedisplay();
+        }
+        else if (t == "yes_st")   // можно стрелять, спрашивает куда попали
+        {
+            isPlayer1 = false;
             glutPostRedisplay();
         }
         else if (t == "hurt")   // в нас попали, спрашиваем - куда?
@@ -75,8 +79,14 @@ void Rotate(int value)
             end1 = true;
             glutPostRedisplay();
         }
+        else if (t == "win")   //по причине выхода другого игрока
+        {
+            end3 = true;
+            glutPostRedisplay();
+        }
     }
-    glutTimerFunc(2, Rotate, 1);
+
+    glutTimerFunc(1, Rotate, 1);
 }
 
 int main(int argc, char *argv[])
@@ -118,7 +128,7 @@ int main(int argc, char *argv[])
     glutKeyboardFunc(Keyboard);
     glutSpecialFunc(specialKeys);  //вызываем функцию для поворотов кубиков
     glutReshapeFunc(changeSize);
-    glutTimerFunc(2, Rotate, 1);
+    glutTimerFunc(1, Rotate, 2);
 
     glutMainLoop();  //а это бесконечный цикл
     return 0;

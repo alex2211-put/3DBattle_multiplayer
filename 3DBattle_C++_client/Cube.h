@@ -9,6 +9,7 @@
 
 bool end1 = false;
 bool end2 = false;
+bool end3 = false;
 bool space = false;
 
 int forTwoPlayers = 0;

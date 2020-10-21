@@ -150,6 +150,30 @@ void end2Function()
     renderBitmapString(-0.12, -0.6, GLUT_BITMAP_TIMES_ROMAN_24, "Press Enter to exit");
 }
 
+void end3Function()
+{
+    if (one_time) {
+        finish = get_time();
+        one_time = false;
+    }
+    sprintf(&textLast[0], "%f", finish - start);
+    glColor3d(1, 1, 1);
+    renderBitmapString(-0.05, 0.8, GLUT_BITMAP_TIMES_ROMAN_24, "The end");
+    renderBitmapString(-0.25, 0.6, GLUT_BITMAP_TIMES_ROMAN_24, "Thank you to choose 3D Sea Battle!");
+    renderBitmapString(-0.4, 0.4, GLUT_BITMAP_TIMES_ROMAN_24,
+                       "Your opponent is out of the game. You win! Congratulations!");
+    renderBitmapString(-0.1, 0.2, GLUT_BITMAP_TIMES_ROMAN_24,
+                       "You have spent:");
+    glColor3d(0, 1, 0);
+    renderBitmapString(-0.05, 0.0, GLUT_BITMAP_TIMES_ROMAN_24,
+                       textLast);
+    glColor3d(1, 1, 1);
+    renderBitmapString(-0.11, -0.2, GLUT_BITMAP_TIMES_ROMAN_24,
+                       "seconds in a game");
+    glColor3d(1, 1, 0);
+    renderBitmapString(-0.12, -0.6, GLUT_BITMAP_TIMES_ROMAN_24, "Press Enter to exit");
+}
+
 void rulesFunction()
 {
     glColor3d(1, 1, 1);
