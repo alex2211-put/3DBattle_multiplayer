@@ -173,7 +173,6 @@ void isCorrectYes()
             sendServ(s, "ready " + m + " " + std::to_string(LengthBigCube));   ///отправляем ready, карту и размер поля
             readServ(s);
             waiting_window = true;
-
             return;
         }
     }

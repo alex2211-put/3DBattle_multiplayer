@@ -1,6 +1,6 @@
 import asyncio
 from random import randint
-
+# написать постановление троек при убийстве кораблей. На сервер
 '''
 3) Написать повторное подключение игрока к серверу по причине локального вылета из игры.
 4) Написать восстановление сервера при его неожиданном падении (файл, где хранятся действующие игры).
@@ -43,7 +43,6 @@ class ClientServerProtocol(asyncio.Protocol):
 
     def data_received(self, data):
         data = (data.decode('utf-8')).split()
-
         if data[0] in self.everything:
             if data[1] == 'ready':
                 self.ready_func(data)
@@ -54,15 +53,26 @@ class ClientServerProtocol(asyncio.Protocol):
             elif data[1] == '?':  # стучимся в сервер в ожидании начала стрельбы (когда игра идет)
                 self.waiting_func(data)
 
-            elif (data[1] == "x" or data[1] == 'kill_sec'):  # клиент
+            elif data[1] == "x" or data[1] == 'kill_sec':  # клиент
                 # ждет координат своего подбитого корабля
                 self.everything[data[0]][0].write(
                     (str(self.where[0]) + ' ' + str(self.where[1]) + ' ' + str(self.where[2])).encode())
                 self.everything[data[0]][1] = 'wait'
 
+            elif data[1] == 'after_kill':
+                LengthBigCube = int(data[len(data) - 1])
+                count_map = 2
+                battle_map = [[[0 for _ in range(LengthBigCube)] for _ in range(LengthBigCube)] for _ in
+                              range(LengthBigCube)]
+                for i in range(LengthBigCube):
+                    for j in range(LengthBigCube):
+                        for k in range(LengthBigCube):
+                            battle_map[i][j][k] = data[count_map]
+                            count_map += 1
+                self.everything[data[0]][2] = battle_map
+
             elif data[1] == 'hurt':  # клиент ждет
                 # координат своего промазанного поля (какой закрасить синим)
-                print('hurt')
                 self.everything[data[0]][0].write(
                     (str(self.where[0]) + ' ' + str(self.where[1]) + ' ' + str(self.where[2])).encode())
 
@@ -75,6 +85,52 @@ class ClientServerProtocol(asyncio.Protocol):
                     self.everything[data[0]][0].write(str(0).encode())
                 else:
                     self.everything[data[0]][0].write("no\n".encode())
+
+            elif data[1] == 'back':
+                if data[2] in self.everything:
+                    print('back')
+                    self.everything[data[2]][0] = self.everything[data[0]][0]
+                    del self.everything[data[0]]
+                    if len(self.everything[data[2]]) > 1:
+                        map = ''
+                        for i in range(self.everything[data[2]][3]):
+                            for j in range(self.everything[data[2]][3]):
+                                for k in range(self.everything[data[2]][3]):
+                                    map += str(self.everything[data[2]][2][i][j][k])
+                        if self.everything[data[2]][1] == 'ready':   # если он ожидал противника
+                            self.everything[data[2]][0].write('ready\n'.encode())
+                            self.everything[data[2]][0].write(map.encode())
+                        elif self.everything[data[2]][1] == 'wait':
+                            hash_with_who = self.pairs[self.everything[data[2]][4][0]][
+                                1 - self.everything[data[2]][4][1]]
+                            self.everything[data[2]][0].write('wait\n'.encode())
+                            self.everything[data[2]][0].write(map.encode())
+                            map2 = ''
+                            for i in range(self.everything[hash_with_who][3]):
+                                for j in range(self.everything[hash_with_who][3]):
+                                    for k in range(self.everything[hash_with_who][3]):
+                                        if self.everything[hash_with_who][2][i][j][k] == 1:
+                                            map2 += str(2)
+                                        else:
+                                            map2 += str(self.everything[hash_with_who][2][i][j][k])
+                            self.everything[data[2]][0].write(map2.encode())
+                        elif self.everything[data[2]][1] == 'shoots' or self.everything[data[2]][1] == 'fire_st':
+                            hash_with_who = self.pairs[self.everything[data[2]][4][0]][
+                                1 - self.everything[data[2]][4][1]]
+                            self.everything[data[2]][0].write('fire\n'.encode())
+                            self.everything[data[2]][0].write(map.encode())
+                            map2 = ''
+                            for i in range(self.everything[hash_with_who][3]):
+                                for j in range(self.everything[hash_with_who][3]):
+                                    for k in range(self.everything[hash_with_who][3]):
+                                        if self.everything[hash_with_who][2][i][j][k] == 1:
+                                            map2 += str(2)
+                                        else:
+                                            map2 += str(self.everything[hash_with_who][2][i][j][k])
+                            self.everything[data[2]][0].write(map2.encode())
+                    else:
+                        print('not_ready')
+                        self.everything[data[2]][0].write('not_ready\n'.encode())
 
             elif data[1] == 'end':  # окончание игры клиентом
                 try:

@@ -22,7 +22,7 @@ void Rotate(int value)
         }
         //glutPostRedisplay();
     }
-    else if(forTwoPlayers == 2)   ///стреляем мы, в кубик справа, при этом это выражение false
+    else if(forTwoPlayers == 2)   //стреляем мы, в кубик справа, при этом это выражение false
     {
         std::string t;
         if (!end1 && !end2 && !end3)
@@ -72,6 +72,12 @@ void Rotate(int value)
             p1 = 0;
             yf = 0;
             z1 = 0;
+            std::string m;
+            for (int r = 0; r < LengthBigCube; r++)
+                for (int u = 0; u < LengthBigCube; u++)
+                    for (int y = 0; y < LengthBigCube; y++)
+                        m += std::to_string(Player1[r][u][y].getHit()) + " ";
+            sendServ(s, "after_kill " + m + " " + std::to_string(LengthBigCube));
             glutPostRedisplay();
         }
         else if (t == "fail")
@@ -113,7 +119,104 @@ int main(int argc, char *argv[])
             fout << hash; // запись строки в файл
             fout.close();
         }
-        else hash = word;   /// если файл не пустой, то считываем хэш и ... реализовываем))) потом..
+        else {
+            s = init_sock();
+            hash = readServ(s);   /// если файл не пустой, то считываем хэш и ... реализовываем))) потом..
+            sendServ(s, "back " + word);   // отправляем что мы вернулись назад после поломки локальной
+            hash = word;
+            std::string t = readServ(s);
+            if (t == "ready\n")
+            {
+                t = readServ(s);
+                int count_map = 0;
+                int len = int(pow(t.length(), 1./3));
+                for (int i = 0; i <= len; i++)
+                    for (int j = 0; j <= len; j++)
+                        for (int k = 0; k <= len; k++)
+                        {
+                            Player1[i][j][k].setIsHitten(int(t[count_map]) - 48);
+                            count_map++;
+                        }
+                one = false;
+                forOnePaint = 0;
+                forEnter = 0;
+                movement = true;
+                glClearColor(0.07, 0.07, 0.25, 0.f);
+                waiting_window = true;
+                mainmenu = false;
+                forTwoPlayers = 2;
+            } else if (t == "not_ready")
+            {}
+            else if (t == "wait\n")
+            {
+                std::cout << "wait";
+                t = readServ(s);
+                int count_map = 0;
+                int len = int(pow(t.length(), 1./3));
+                for (int i = 0; i <= len; i++)
+                    for (int j = 0; j <= len; j++)
+                        for (int k = 0; k <= len; k++)
+                        {
+                            Player1[i][j][k].setIsHitten(int(t[count_map]) - 48);
+                            count_map++;
+                        }
+                one = false;
+                forOnePaint = 0;
+                forEnter = 0;
+                movement = true;
+                glClearColor(0.07, 0.07, 0.25, 0.f);
+                waiting_window = true;
+                mainmenu = false;
+                forTwoPlayers = 2;
+                isPlayer1 = true;
+                t = readServ(s);
+                count_map = 0;
+                len = int(pow(t.length(), 1./3));
+                for (int i = 0; i <= len; i++)
+                    for (int j = 0; j <= len; j++)
+                        for (int k = 0; k <= len; k++)
+                        {
+                            Player2[i][j][k].setIsHitten(int(t[count_map]) - 48);
+                            count_map++;
+                        }
+            }
+            else if (t == "fire\n")
+            {
+                std::cout << "fire" << std::endl;
+                t = readServ(s);
+                std::cout << t << std::endl;
+                std::cout << std::endl;
+                int count_map = 0;
+                int len = int(pow(t.length(), 1./3));
+                for (int i = 0; i <= len; i++)
+                    for (int j = 0; j <= len; j++)
+                        for (int k = 0; k <= len; k++)
+                        {
+                            std::cout << int(t[count_map]) - 48;
+                            Player1[i][j][k].setIsHitten(int(t[count_map]) - 48);
+                            count_map++;
+                        }
+                one = false;
+                forOnePaint = 0;
+                forEnter = 0;
+                movement = true;
+                glClearColor(0.07, 0.07, 0.25, 0.f);
+                waiting_window = false;
+                mainmenu = false;
+                forTwoPlayers = 2;
+                isPlayer1 = false;
+                t = readServ(s);
+                count_map = 0;
+                len = int(pow(t.length(), 1./3));
+                for (int i = 0; i <= len; i++)
+                    for (int j = 0; j <= len; j++)
+                        for (int k = 0; k <= len; k++)
+                        {
+                            Player2[i][j][k].setIsHitten(int(t[count_map]) - 48);
+                            count_map++;
+                        }
+            }
+        }
     }
     else   // если не существует
     {
