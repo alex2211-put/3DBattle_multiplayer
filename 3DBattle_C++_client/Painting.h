@@ -76,10 +76,12 @@ void displayCell()
     } else if (help)
     {
         helpFunction();
+    } else if (bot_player_window)
+    {
+        pot_player_puncts[carrier_bot] = true;
+        bot_player_func();
     } else
-    {        // После отключения справки возвращаемся в 3D
-
-    if (waiting_window)
+        { if (waiting_window)
     {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); //очищаем экран, чтобы картинки "не размножались"
 
@@ -103,8 +105,7 @@ void displayCell()
         points++;
         if (points > 45)
             points = 0;
-    }
-    else {
+    } else {
         glMatrixMode(GL_PROJECTION);
         glLoadIdentity();
         glOrtho(-1.5, 1.5, -1, 1, 1, -1);

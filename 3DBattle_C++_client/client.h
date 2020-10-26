@@ -17,6 +17,9 @@
 int s;
 std::string hash;
 bool waiting_window = false;
+bool bot_player_window = false;
+bool bot = false;
+unsigned int carrier_bot = 0;
 
 
 int init_sock() {

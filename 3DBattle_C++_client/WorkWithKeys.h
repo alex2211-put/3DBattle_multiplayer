@@ -24,8 +24,8 @@ void Keyboard(unsigned char key, int x, int y)
         if (menupuncts[0])
         {
             menupuncts[0] = false;
-            placing_ships = true;
             tileschange = false;
+            bot_player_window = true;
         } else
         {
             if (menupuncts[1])
@@ -49,6 +49,14 @@ void Keyboard(unsigned char key, int x, int y)
             }
             }
         }
+    }
+    else if (key == 13 && bot_player_window)
+    {
+        bot_player_window = false;
+        placing_ships = true;
+        if (pot_player_puncts[0])
+            bot = false;
+        else bot = true;
     }
     if(key == 13 && (end1 || end2 || end3))
     {
@@ -202,7 +210,30 @@ void specialKeys(int key, int x, int y)
                 y3 = j_third_side;
             }
         }
-    } else {
+    } else if (bot_player_window)
+    {
+        if (key == GLUT_KEY_DOWN) {
+            pot_player_puncts[carrier_bot] = false;
+            if (carrier_bot < 1) {
+                carrier_bot++;
+                pot_player_puncts[carrier_bot] = true;
+            } else {
+                carrier_bot = 0;
+                pot_player_puncts[carrier_bot] = true;
+            }
+        }
+        if (key == GLUT_KEY_UP) {
+            pot_player_puncts[carrier_bot] = false;
+            if (carrier_bot > 0) {
+                carrier_bot--;
+                pot_player_puncts[carrier_bot] = true;
+            } else {
+                carrier_bot = 1;
+                pot_player_puncts[carrier_bot] = true;
+            }
+        }
+    }
+    else {
 
         if (key == GLUT_KEY_F1) {
             help = (!help);

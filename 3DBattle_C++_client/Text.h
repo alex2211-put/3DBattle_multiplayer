@@ -21,6 +21,8 @@ int ship = LengthBigCube - 2; // счетчик для расстановки к
 bool isPlayer1 = true;
 int number_of_ships = 1; // счетчик числа кораблей с определенным кол-вом палуб (самый большой корабль всегда один)
 
+bool pot_player_puncts[2] = {false};   // Подсвечивает жёлтым курсор в главном меню
+
 
 double get_time()
 {
@@ -99,6 +101,28 @@ void mainMenuFunction()
         glColor3d(1, 1, 1);
     }
     renderBitmapString(-0.015, -0.5, GLUT_BITMAP_TIMES_ROMAN_24, "Exit");
+}
+
+void bot_player_func()
+{
+    glColor3d(1, 1, 1);
+    renderBitmapString(-0.25, 0.3, GLUT_BITMAP_TIMES_ROMAN_24, "You want to play with a player or bot?");
+    if (pot_player_puncts[0])
+    {
+        glColor3d(1, 1, 0);
+    } else
+    {
+        glColor3d(1, 1, 1);
+    }
+    renderBitmapString(-0.05, 0.05, GLUT_BITMAP_TIMES_ROMAN_24, "Player");
+    if (pot_player_puncts[1])
+    {
+        glColor3d(1, 1, 0);
+    } else
+    {
+        glColor3d(1, 1, 1);
+    }
+    renderBitmapString(-0.03, -0.2, GLUT_BITMAP_TIMES_ROMAN_24, "Bot");
 }
 
 void end1Function()
