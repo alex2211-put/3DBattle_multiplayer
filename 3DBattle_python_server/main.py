@@ -1,6 +1,7 @@
 import asyncio
 from random import randint
 import json
+from time import sleep
 
 '''
 3) Написать повторное подключение игрока к серверу по причине локального вылета из игры.
@@ -33,6 +34,7 @@ class ClientServerProtocol(asyncio.Protocol):
     # 4 число - размер карты
     # 5 число - номер пары(0) и полож. в ней(1)
     # 6 число - число оставшихся кораблей
+    # 7 число - комплект бота
     pairs = []
     new_pair_num = [0]
     where = [-1, -1, -1]
@@ -167,16 +169,8 @@ class ClientServerProtocol(asyncio.Protocol):
 
         self.everything[data[0]].append(LengthBigCube)  # размер поля в словарь
 
-        if int(data[int(len(data)) - 1]) == 1:  # если играем с ботом
-            '''Создать комплект бота и добавить в тапл'''
-            for i in self.pairs_bots:
-                if len(i) == 0:
-                    i.append((data[0]))
-                    to_pair = True
-            if not to_pair:
-                self.pairs_bots.append((data[0]))
 
-        else:  # если хочет играть с человеком
+        if int(data[int(len(data)) - 1]) == 0:  # если хочет играть с человеком
             for i in self.pairs:
                 count += 1
                 if len(i) == 0:
@@ -203,76 +197,179 @@ class ClientServerProtocol(asyncio.Protocol):
                 self.pairs.append([data[0]])
                 self.everything[data[0]].append((len(self.pairs) - 1, 0))
                 self.everything[data[0]][1] = 'ready'
-        ships = (1 + LengthBigCube - 2) * (
-                LengthBigCube - 2) / 2  # подсчитаем арифметической прогрессией число кораблей
-        self.everything[data[0]].append(ships)  # число кораблей в словарь
-        self.everything[data[0]].append(data[int(len(data)) - 1])
+            ships = (1 + LengthBigCube - 2) * (
+                    LengthBigCube - 2) / 2  # подсчитаем арифметической прогрессией число кораблей
+            self.everything[data[0]].append(ships)  # число кораблей в словарь
+        else:  # если играем с ботом
+            '''Создать комплект бота и добавить в тапл'''
+            bot = Bot(LengthBigCube)
+            self.everything[data[0]].append((0, 0))
+            who = randint(0, 1)
+            self.everything[data[0]][0].write(str(who).encode())
+            if who == 1:
+                self.everything[data[0]][1] = 'fire_st'  # ставим статус что он стреляет
+            else:
+                self.everything[data[0]][1] = 'wait'
+            ships = (1 + LengthBigCube - 2) * (
+                    LengthBigCube - 2) / 2  # подсчитаем арифметической прогрессией число кораблей
+            self.everything[data[0]].append(ships)  # число кораблей в словарь
+            self.everything[data[0]].append(bot)   # добавляем комплект бота
         self.everything[data[0]][0].write('ok'.encode())
+        print(self.everything[data[0]])
 
-    def fire_func(self, data):
-        self.where[0] = int(data[2])
-        self.where[1] = int(data[3])
-        self.where[2] = int(data[4])
+    def for_bot_fire(self, data, bot):
+        sleep(1)
+        print('bot_fire')
+        map_enemy = None
+        if not bot.fire:
+            self.where[0], self.where[1], self.where[2] = [int(i) for i in bot.fire_func()]
+        else:
+            self.where[0], self.where[1], self.where[2] = [int(i) for i in bot.after_hit()]
+        map_enemy = self.everything[data[0]][2]
         LengthBigCube = self.everything[data[0]][3]
-        hash_with_who = self.pairs[self.everything[data[0]][4][0]][1 - self.everything[data[0]][4][1]]
-        if int(self.everything[hash_with_who][2][self.where[0]][self.where[1]][self.where[2]]) == 1:  # если попали
-            self.everything[hash_with_who][2][self.where[0]][self.where[1]][self.where[2]] = 4
-            self.everything[hash_with_who][1] = 'hurt'  # меняем статус на "попали"
+
+        if int(map_enemy[self.where[0]][self.where[1]][self.where[2]]) == 1:  # если попали
+            map_enemy[self.where[0]][self.where[1]][self.where[2]] = 4
+            self.everything[data[0]][1] = 'hurt'  # меняем статус на "попали"
 
             hit = True  # проверяем, жив корабль или убит
-            where_ = [int(data[2]), int(data[3]), int(data[4])]
+            where_ = [self.where[0], self.where[1], self.where[2]]
             while where_[0] - 1 >= 0 and \
-                    int(self.everything[hash_with_who][2][where_[0]][where_[1]][where_[2]]) == 4:
-                if int(self.everything[hash_with_who][2][where_[0] - 1][where_[1]][where_[2]]) == 1:
+                    int(map_enemy[where_[0]][where_[1]][where_[2]]) == 4:
+                if int(map_enemy[where_[0] - 1][where_[1]][where_[2]]) == 1:
                     hit = False
                 where_[0] -= 1
-            where_ = [int(data[2]), int(data[3]), int(data[4])]
+            where_ = [self.where[0], self.where[1], self.where[2]]
             while where_[0] + 1 < LengthBigCube and \
-                    int(self.everything[hash_with_who][2][where_[0]][where_[1]][where_[2]]) == 4:
-                if int(self.everything[hash_with_who][2][where_[0] + 1][where_[1]][where_[2]]) == 1:
+                    int(map_enemy[where_[0]][where_[1]][where_[2]]) == 4:
+                if int(map_enemy[where_[0] + 1][where_[1]][where_[2]]) == 1:
                     hit = False
                 where_[0] += 1
-            where_ = [int(data[2]), int(data[3]), int(data[4])]
+            where_ = [self.where[0], self.where[1], self.where[2]]
             while where_[1] - 1 >= 0 and \
-                    int(self.everything[hash_with_who][2][where_[0]][where_[1]][where_[2]]) == 4:
-                if int(self.everything[hash_with_who][2][where_[0]][where_[1] - 1][where_[2]]) == 1:
+                    int(map_enemy[where_[0]][where_[1]][where_[2]]) == 4:
+                if int(map_enemy[where_[0]][where_[1] - 1][where_[2]]) == 1:
                     hit = False
                 where_[1] -= 1
-            where_ = [int(data[2]), int(data[3]), int(data[4])]
+            where_ = [self.where[0], self.where[1], self.where[2]]
             while where_[1] + 1 < LengthBigCube and \
-                    int(self.everything[hash_with_who][2][where_[0]][where_[1]][where_[2]]) == 4:
-                if int(self.everything[hash_with_who][2][where_[0]][where_[1] + 1][where_[2]]) == 1:
+                    int(map_enemy[where_[0]][where_[1]][where_[2]]) == 4:
+                if int(map_enemy[where_[0]][where_[1] + 1][where_[2]]) == 1:
                     hit = False
                 where_[1] += 1
-            where_ = [int(data[2]), int(data[3]), int(data[4])]
+            where_ = [self.where[0], self.where[1], self.where[2]]
             while where_[2] - 1 >= 0 and \
-                    int(self.everything[hash_with_who][2][where_[0]][where_[1]][where_[2]]) == 4:
-                if int(self.everything[hash_with_who][2][where_[0]][where_[1]][where_[2] - 1]) == 1:
+                    int(map_enemy[where_[0]][where_[1]][where_[2]]) == 4:
+                if int(map_enemy[where_[0]][where_[1]][where_[2] - 1]) == 1:
                     hit = False
                 where_[2] -= 1
-            where_ = [int(data[2]), int(data[3]), int(data[4])]
+            where_ = [self.where[0], self.where[1], self.where[2]]
             while where_[2] + 1 < LengthBigCube and \
-                    int(self.everything[hash_with_who][2][where_[0]][where_[1]][where_[2]]) == 4:
-                if int(self.everything[hash_with_who][2][where_[0]][where_[1]][where_[2] + 1]) == 1:
+                    int(map_enemy[where_[0]][where_[1]][where_[2]]) == 4:
+                if int(map_enemy[where_[0]][where_[1]][where_[2] + 1]) == 1:
                     hit = False
                 where_[2] += 1
 
             if hit:  # если корабль убит
-                self.everything[hash_with_who][5] -= 1
-                if self.everything[hash_with_who][5] == 0:  # если у противника закончились корабли
-                    self.everything[data[0]][0].write("win".encode())  # отправляем - ты выиграл
-                    self.everything[hash_with_who][1] = 'fail'
+                self.everything[data[0]][5] -= 1
+                if self.everything[data[0]][5] == 0:  # если у противника закончились корабли
+                    self.everything[data[0]][1] = 'fail'
                 else:
-                    self.everything[data[0]][0].write("kill".encode())  # убит, но еще есть корабли другие
-                    self.everything[hash_with_who][1] = 'kill'
+                    self.everything[data[0]][1] = 'kill'
+                    bot.kill_enemy()
+                    bot.fire = True
+            else:  # если корабль не убит
+                bot.fire = True
+        else:
+            bot.fire = False
+            self.everything[data[0]][1] = 'fire'  # меняем статус
+            map_enemy[self.where[0]][self.where[1]][self.where[2]] = 3
+
+    def fire_func(self, data):
+        map_enemy = None
+        bot = False
+        bot_pack = None
+        hash_with_who = None
+        if len(self.everything[data[0]]) == 7:
+            map_enemy = self.everything[data[0]][6].my_map
+            bot = True
+            bot_pack = self.everything[data[0]][6]
+        else:
+            hash_with_who = self.pairs[self.everything[data[0]][4][0]][1 - self.everything[data[0]][4][1]]
+            map_enemy = self.everything[hash_with_who][2]
+        self.where[0] = int(data[2])
+        self.where[1] = int(data[3])
+        self.where[2] = int(data[4])
+        LengthBigCube = self.everything[data[0]][3]
+
+        if int(map_enemy[self.where[0]][self.where[1]][self.where[2]]) == 1:  # если попали
+            map_enemy[self.where[0]][self.where[1]][self.where[2]] = 4
+            if not bot:
+                self.everything[hash_with_who][1] = 'hurt'  # меняем статус на "попали"
+
+            hit = True  # проверяем, жив корабль или убит
+            where_ = [int(data[2]), int(data[3]), int(data[4])]
+            while where_[0] - 1 >= 0 and \
+                    int(map_enemy[where_[0]][where_[1]][where_[2]]) == 4:
+                if int(map_enemy[where_[0] - 1][where_[1]][where_[2]]) == 1:
+                    hit = False
+                where_[0] -= 1
+            where_ = [int(data[2]), int(data[3]), int(data[4])]
+            while where_[0] + 1 < LengthBigCube and \
+                    int(map_enemy[where_[0]][where_[1]][where_[2]]) == 4:
+                if int(map_enemy[where_[0] + 1][where_[1]][where_[2]]) == 1:
+                    hit = False
+                where_[0] += 1
+            where_ = [int(data[2]), int(data[3]), int(data[4])]
+            while where_[1] - 1 >= 0 and \
+                    int(map_enemy[where_[0]][where_[1]][where_[2]]) == 4:
+                if int(map_enemy[where_[0]][where_[1] - 1][where_[2]]) == 1:
+                    hit = False
+                where_[1] -= 1
+            where_ = [int(data[2]), int(data[3]), int(data[4])]
+            while where_[1] + 1 < LengthBigCube and \
+                    int(map_enemy[where_[0]][where_[1]][where_[2]]) == 4:
+                if int(map_enemy[where_[0]][where_[1] + 1][where_[2]]) == 1:
+                    hit = False
+                where_[1] += 1
+            where_ = [int(data[2]), int(data[3]), int(data[4])]
+            while where_[2] - 1 >= 0 and \
+                    int(map_enemy[where_[0]][where_[1]][where_[2]]) == 4:
+                if int(map_enemy[where_[0]][where_[1]][where_[2] - 1]) == 1:
+                    hit = False
+                where_[2] -= 1
+            where_ = [int(data[2]), int(data[3]), int(data[4])]
+            while where_[2] + 1 < LengthBigCube and \
+                    int(map_enemy[where_[0]][where_[1]][where_[2]]) == 4:
+                if int(map_enemy[where_[0]][where_[1]][where_[2] + 1]) == 1:
+                    hit = False
+                where_[2] += 1
+
+            if hit:  # если корабль убит
+                if not bot:
+                    self.everything[hash_with_who][5] -= 1
+                    if self.everything[hash_with_who][5] == 0:  # если у противника закончились корабли
+                        self.everything[data[0]][0].write("win".encode())  # отправляем - ты выиграл
+                        self.everything[hash_with_who][1] = 'fail'
+                    else:
+                        self.everything[data[0]][0].write("kill".encode())  # убит, но еще есть корабли другие
+                        self.everything[hash_with_who][1] = 'kill'
+                elif bot:
+                    bot_pack.ships -= 1
+                    if bot_pack.ships == 0:
+                        self.everything[data[0]][0].write("win".encode())
+                    else:
+                        bot_pack.kill_func([self.where[0], self.where[1], self.where[2]])
             else:  # если корабль не убит
                 self.everything[data[0]][0].write("yes".encode())  # кидаем да, ты попал, но не убил
+
 
         else:
             self.everything[data[0]][0].write("no".encode())  # кидаем нет
             self.everything[data[0]][1] = 'wait'  # меняем статус
-            self.everything[hash_with_who][1] = 'fire'  # меняем статус
-            self.everything[hash_with_who][2][self.where[0]][self.where[1]][self.where[2]] = 3
+            if not bot:
+                self.everything[hash_with_who][1] = 'fire'  # меняем статус
+            map_enemy[self.where[0]][self.where[1]][self.where[2]] = 3
 
     def waiting_func(self, data):
         if self.everything[data[0]][1] == 'fire_st':  # если можно стрелять
@@ -286,13 +383,18 @@ class ClientServerProtocol(asyncio.Protocol):
         elif self.everything[data[0]][1] == 'fail' or self.everything[data[0]][1] == 'win':
             self.everything[data[0]][0].write((self.everything[data[0]][1]).encode())
             hash_with_who = self.pairs[self.everything[data[0]][4][0]][1 - self.everything[data[0]][4][1]]
-            del self.everything[hash_with_who]
+            if len(self.everything[data[0]]) == 7:
+                del self.everything[hash_with_who]
             self.pairs[self.everything[data[0]][4][0]] = []
             del self.everything[data[0]]
 
         elif self.everything[data[0]][1] == 'kill':
             self.everything[data[0]][0].write('kill'.encode())
         else:
+            print(data)
+            if len(self.everything[data[0]]) == 7 and self.everything[data[0]][1] == 'wait':
+                sleep(3)
+                self.for_bot_fire(data, self.everything[data[0]][6])
             self.everything[data[0]][0].write("no".encode())
 
 
@@ -301,7 +403,7 @@ class Bot:
         self.map_enemy = [[[0 for _ in range(len_cube)] for _ in range(len_cube)] for _ in range(len_cube)]
         with open(".maps.json", 'r') as f:
             data = json.load(f)
-            map_str = data[str(len_cube)][randint(0, len(data[len_cube]) - 1)]
+            map_str = data[str(len_cube)][randint(0, len(data[str(len_cube)]) - 1)]
             battle_map = [[[0 for _ in range(len_cube)] for _ in range(len_cube)] for _ in range(len_cube)]
             count_map = 0
             for i in range(len_cube):
@@ -315,11 +417,17 @@ class Bot:
         self.hit = []  # в какие клетки попали (еще не убив корабля)
         self.i, self.j, self.k = None, None, None
         self.can_fire_hit = []
+        self.ships = (1 + len_cube - 2) * (
+                len_cube - 2) / 2  # подсчитаем арифметической прогрессией число кораблей
+        self.fire = False
 
     def fire_func(self):  # стреляет бот
         r = None
         if len(self.hit) == 1:
-            r = self.can_fire_hit[randint(0, len(self.can_fire_hit))]
+            if len(self.can_fire_hit) == 1:
+                r = self.can_fire_hit[0]
+            else:
+                r = self.can_fire_hit[randint(0, len(self.can_fire_hit) - 1)]
             self.can_fire_hit.remove(r)
         elif len(self.hit) > 1:
             t1, t2 = self.hit[len(self.hit) - 1], self.hit[len(self.hit) - 2]
@@ -347,7 +455,7 @@ class Bot:
                 r3 = o[0] if o[1] is None else o[1] if o[0] is None else o[randint(0, 1)]
                 r = [r3, t1[1], t1[2]]
         else:
-            r = self.cells_empty[randint(0, self.len_cube ** 3 - 1)]
+            r = self.cells_empty[randint(0, len(self.cells_empty) - 1)]
         i, j, k = [int(p) for p in r]
         self.cells_empty.remove(r)
         self.map_enemy[i][j][k] = 3  # промахнулись
@@ -363,20 +471,10 @@ class Bot:
                                  for k in range(self.k - 1, self.k + 1, 2) if 0 <= k < self.len_cube]
         self.fire_func()
 
-    def bot_hit_func(self, cells):  # когда стреляли в бота
-        i, j, k = [int(p) for p in cells]
-        if self.my_map[i][j][k] == 1:
-            self.my_map[i][j][k] = 4
-            return 1  # попадание
-        elif self.my_map[i][j][k] == 3 or self.my_map[i][j][k] == 4:
-            return 2  # повторный выстрел
-        else:
-            self.my_map[i][j][k] = 3
-            return 0  # промах
-
     def kill_enemy(self):  # бот убил корабль противника
         self.can_fire_hit = []
         self.map_enemy[self.i][self.j][self.k] = 4
+        self.hit.append([self.i, self.j, self.k])
         if len(self.hit) == 1:
             c = [[i, j, k] for i in range(self.i - 1, self.i + 1, 2) if 0 <= i < self.len_cube
                  for j in range(self.j - 1, self.j + 1, 2) if 0 <= j < self.len_cube
@@ -420,7 +518,62 @@ class Bot:
         self.hit = []
 
     def kill_func(self, cells):  # когда убили корабль бота
-        pass
+        self.my_map[cells[0]][cells[1]][cells[2]] = 4
+        t1 = [int(p) for p in cells]
+        t2 = None
+        c = [[i, j, k] for i in range(t1[0] - 1, t1[0] + 1, 2) if 0 <= i < self.len_cube
+             for j in range(t1[1] - 1, t1[1] + 1, 2) if 0 <= j < self.len_cube
+             for k in range(t1[2] - 1, t1[2] + 1, 2) if 0 <= k < self.len_cube]
+        for i in c:
+            if self.map_enemy[i[0]][i[1]][i[2]] == 4:
+                t2 = [i[0], i[1], i[2]]
+        o = None
+        if t2 is not None:
+            if t1[0] == t2[0]:
+                if t1[1] == t2[1]:
+                    o = t1[2]
+                    while self.my_map[t1[0]][t1[1]][o] == 4 and o < self.len_cube:
+                        o += 1
+                    o -= 1
+                    while o >= 0 and self.my_map[t1[0]][t1[1]][o] == 4:
+                        c = [[i, j, k] for i in range(t1[0] - 1, t1[0] + 1, 2) if 0 <= i < self.len_cube
+                             for j in range(t1[1] - 1, t1[1] + 1, 2) if 0 <= j < self.len_cube
+                             for k in range(o - 1, o + 1, 2) if 0 <= k < self.len_cube]
+                        for i in c:
+                            if self.my_map[i[0]][i[1]][i[2]] == 0:
+                                self.my_map[i[0]][i[1]][i[2]] = 3
+                        o -= 1
+                else:
+                    o = t1[1]
+                    while self.my_map[t1[0]][o][t1[2]] == 4 and o < self.len_cube:
+                        o += 1
+                    o -= 1
+                    while o >= 0 and self.my_map[t1[0]][o][t1[2]] == 4:
+                        c = [[i, j, k] for i in range(t1[0] - 1, t1[0] + 1, 2) if 0 <= i < self.len_cube
+                             for j in range(o - 1, o + 1, 2) if 0 <= j < self.len_cube
+                             for k in range(t1[2] - 1, t1[2] + 1, 2) if 0 <= k < self.len_cube]
+                        for i in c:
+                            if self.my_map[i[0]][i[1]][i[2]] == 0:
+                                self.my_map[i[0]][i[1]][i[2]] = 3
+                        o -= 1
+            else:
+                o = t1[0]
+                while self.my_map[o][t1[1]][t1[2]] == 4 and o < self.len_cube:
+                    o += 1
+                o -= 1
+                while o >= 0 and self.my_map[o][t1[1]][t1[2]] == 4:
+                    c = [[i, j, k] for i in range(o - 1, o + 1, 2) if 0 <= i < self.len_cube
+                         for j in range(t1[1] - 1, t1[1] + 1, 2) if 0 <= j < self.len_cube
+                         for k in range(t1[2] - 1, t1[2] + 1, 2) if 0 <= k < self.len_cube]
+                    for i in c:
+                        if self.my_map[i[0]][i[1]][i[2]] == 0:
+                            self.my_map[i[0]][i[1]][i[2]] = 3
+                    o -= 1
+        else:
+            for i in c:
+                if self.map_enemy[i[0]][i[1]][i[2]] == 0:
+                    self.map_enemy[i[0]][i[1]][i[2]] = 3
+
 
 
 if __name__ == '__main__':
