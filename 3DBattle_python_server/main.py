@@ -1,6 +1,7 @@
 import asyncio
 from random import randint
 import json
+
 '''
 3) Написать повторное подключение игрока к серверу по причине локального вылета из игры.
 4) Написать восстановление сервера при его неожиданном падении (файл, где хранятся действующие игры).
@@ -99,7 +100,7 @@ class ClientServerProtocol(asyncio.Protocol):
                             for j in range(self.everything[data[2]][3]):
                                 for k in range(self.everything[data[2]][3]):
                                     map += str(self.everything[data[2]][2][i][j][k])
-                        if self.everything[data[2]][1] == 'ready':   # если он ожидал противника
+                        if self.everything[data[2]][1] == 'ready':  # если он ожидал противника
                             self.everything[data[2]][0].write('ready\n'.encode())
                             self.everything[data[2]][0].write(map.encode())
                         elif self.everything[data[2]][1] == 'wait':
@@ -134,7 +135,7 @@ class ClientServerProtocol(asyncio.Protocol):
                         print('not_ready')
                         self.everything[data[2]][0].write('not_ready\n'.encode())
 
-                else:   # если такого ключа не нашлось
+                else:  # если такого ключа не нашлось
                     self.everything[data[0]][0].write("no".encode())
 
             elif data[1] == 'end':  # окончание игры клиентом
@@ -166,7 +167,7 @@ class ClientServerProtocol(asyncio.Protocol):
 
         self.everything[data[0]].append(LengthBigCube)  # размер поля в словарь
 
-        if int(data[int(len(data)) - 1]) == 1:   # если играем с ботом
+        if int(data[int(len(data)) - 1]) == 1:  # если играем с ботом
             '''Создать комплект бота и добавить в тапл'''
             for i in self.pairs_bots:
                 if len(i) == 0:
@@ -175,7 +176,7 @@ class ClientServerProtocol(asyncio.Protocol):
             if not to_pair:
                 self.pairs_bots.append((data[0]))
 
-        else:   # если хочет играть с человеком
+        else:  # если хочет играть с человеком
             for i in self.pairs:
                 count += 1
                 if len(i) == 0:
@@ -306,21 +307,119 @@ class Bot:
             for i in range(len_cube):
                 for j in range(len_cube):
                     for k in range(len_cube):
-                        battle_map[i][j][k] = map_str[count_map]
+                        battle_map[i][j][k] = int(map_str[count_map])
                         count_map += 1
             self.my_map = battle_map
         self.cells_empty = [[i, j, k] for k in range(len_cube) for j in range(len_cube) for i in range(len_cube)]
         self.len_cube = len_cube
+        self.hit = []  # в какие клетки попали (еще не убив корабля)
+        self.i, self.j, self.k = None, None, None
+        self.can_fire_hit = []
 
-    def fire_func(self):   # стреляет он
-        r = self.cells_empty[randint(0, self.len_cube**3 - 1)]
+    def fire_func(self):  # стреляет бот
+        r = None
+        if len(self.hit) == 1:
+            r = self.can_fire_hit[randint(0, len(self.can_fire_hit))]
+            self.can_fire_hit.remove(r)
+        elif len(self.hit) > 1:
+            t1, t2 = self.hit[len(self.hit) - 1], self.hit[len(self.hit) - 2]
+            r = []
+            if t1[0] == t2[0]:
+                if t1[1] == t2[1]:
+                    o = [max([y[2] + 1 if y[2] + 1 < self.len_cube and self.map_enemy[y[0]][y[1]][y[2] + 1] == 0 else
+                              None for y in self.hit]),
+                         min([y[2] - 1 if y[2] - 1 >= 0 and self.map_enemy[y[0]][y[1]][y[2] - 1] == 0 else
+                              None for y in self.hit])]
+                    r3 = o[0] if o[1] is None else o[1] if o[0] is None else o[randint(0, 1)]
+                    r = [t1[0], t1[1], r3]
+                else:
+                    o = [max([y[1] + 1 if y[1] + 1 < self.len_cube and self.map_enemy[y[0]][y[1] + 1][y[2]] == 0 else
+                              None for y in self.hit]),
+                         min([y[1] - 1 if y[1] - 1 >= 0 and self.map_enemy[y[0]][y[1] - 1][y[2]] == 0 else
+                              None for y in self.hit])]
+                    r3 = o[0] if o[1] is None else o[1] if o[0] is None else o[randint(0, 1)]
+                    r = [t1[1], r3, t1[2]]
+            else:
+                o = [max([y[0] + 1 if y[0] + 1 < self.len_cube and self.map_enemy[y[0] + 1][y[1]][y[2]] == 0 else
+                          None for y in self.hit]),
+                     min([y[0] - 1 if y[0] - 1 >= 0 and self.map_enemy[y[0] - 1][y[1]][y[2]] == 0 else
+                          None for y in self.hit])]
+                r3 = o[0] if o[1] is None else o[1] if o[0] is None else o[randint(0, 1)]
+                r = [r3, t1[1], t1[2]]
+        else:
+            r = self.cells_empty[randint(0, self.len_cube ** 3 - 1)]
         i, j, k = [int(p) for p in r]
         self.cells_empty.remove(r)
+        self.map_enemy[i][j][k] = 3  # промахнулись
+        self.i, self.j, self.k = i, j, k  # запоминаем координаты последнего выстрела
+        return r
 
-    def hit_func(self):   # когда стреляли в него
-        pass
+    def after_hit(self):
+        self.map_enemy[self.i][self.j][self.k] = 4  # попали
+        self.hit.append([self.i, self.j, self.k])
+        if not self.can_fire_hit:
+            self.can_fire_hit = [[i, j, k] for i in range(self.i - 1, self.i + 1, 2) if 0 <= i < self.len_cube
+                                 for j in range(self.j - 1, self.j + 1, 2) if 0 <= j < self.len_cube
+                                 for k in range(self.k - 1, self.k + 1, 2) if 0 <= k < self.len_cube]
+        self.fire_func()
 
-    def kill_func(self):   # когда убили его корабль
+    def bot_hit_func(self, cells):  # когда стреляли в бота
+        i, j, k = [int(p) for p in cells]
+        if self.my_map[i][j][k] == 1:
+            self.my_map[i][j][k] = 4
+            return 1  # попадание
+        elif self.my_map[i][j][k] == 3 or self.my_map[i][j][k] == 4:
+            return 2  # повторный выстрел
+        else:
+            self.my_map[i][j][k] = 3
+            return 0  # промах
+
+    def kill_enemy(self):  # бот убил корабль противника
+        self.can_fire_hit = []
+        self.map_enemy[self.i][self.j][self.k] = 4
+        if len(self.hit) == 1:
+            c = [[i, j, k] for i in range(self.i - 1, self.i + 1, 2) if 0 <= i < self.len_cube
+                 for j in range(self.j - 1, self.j + 1, 2) if 0 <= j < self.len_cube
+                 for k in range(self.k - 1, self.k + 1, 2) if 0 <= k < self.len_cube]
+            for i in c:
+                self.map_enemy[i[0]][i[1]][i[2]] = 3
+        else:
+            t1, t2 = self.hit[0], self.hit[1]
+            o = None
+            if t1[0] == t2[0]:
+                if t1[1] == t2[1]:
+                    o = max([y[2] for y in self.hit])
+                    while o >= 0 and self.map_enemy[t1[0]][t1[1]][o] == 4:
+                        c = [[i, j, k] for i in range(t1[0] - 1, t1[0] + 1, 2) if 0 <= i < self.len_cube
+                             for j in range(t1[1] - 1, t1[1] + 1, 2) if 0 <= j < self.len_cube
+                             for k in range(o - 1, o + 1, 2) if 0 <= k < self.len_cube]
+                        for i in c:
+                            if self.map_enemy[i[0]][i[1]][i[2]] == 0:
+                                self.map_enemy[i[0]][i[1]][i[2]] = 3
+                        o -= 1
+                else:
+                    o = max([y[1] for y in self.hit])
+                    while o >= 0 and self.map_enemy[t1[0]][o][t1[2]] == 4:
+                        c = [[i, j, k] for i in range(t1[0] - 1, t1[0] + 1, 2) if 0 <= i < self.len_cube
+                             for j in range(o - 1, o + 1, 2) if 0 <= j < self.len_cube
+                             for k in range(t1[2] - 1, t1[2] + 1, 2) if 0 <= k < self.len_cube]
+                        for i in c:
+                            if self.map_enemy[i[0]][i[1]][i[2]] == 0:
+                                self.map_enemy[i[0]][i[1]][i[2]] = 3
+                        o -= 1
+            else:
+                o = max([y[0] for y in self.hit])
+                while o >= 0 and self.map_enemy[o][t1[1]][t1[2]] == 4:
+                    c = [[i, j, k] for i in range(o - 1, o + 1, 2) if 0 <= i < self.len_cube
+                         for j in range(t1[1] - 1, t1[1] + 1, 2) if 0 <= j < self.len_cube
+                         for k in range(t1[2] - 1, t1[2] + 1, 2) if 0 <= k < self.len_cube]
+                    for i in c:
+                        if self.map_enemy[i[0]][i[1]][i[2]] == 0:
+                            self.map_enemy[i[0]][i[1]][i[2]] = 3
+                    o -= 1
+        self.hit = []
+
+    def kill_func(self, cells):  # когда убили корабль бота
         pass
 
 
