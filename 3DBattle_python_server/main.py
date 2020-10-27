@@ -218,11 +218,12 @@ class ClientServerProtocol(asyncio.Protocol):
         print(self.everything[data[0]])
 
     def for_bot_fire(self, data, bot):
-        sleep(1)
+        sleep(0.5)
         print('bot_fire')
         map_enemy = None
         if not bot.fire:
             self.where[0], self.where[1], self.where[2] = [int(i) for i in bot.fire_func()]
+            print(self.where[0], self.where[1], self.where[2])
         else:
             self.where[0], self.where[1], self.where[2] = [int(i) for i in bot.after_hit()]
         map_enemy = self.everything[data[0]][2]
@@ -277,7 +278,7 @@ class ClientServerProtocol(asyncio.Protocol):
                 else:
                     self.everything[data[0]][1] = 'kill'
                     bot.kill_enemy()
-                    bot.fire = True
+                    bot.fire = False
             else:  # если корабль не убит
                 bot.fire = True
         else:
@@ -360,6 +361,7 @@ class ClientServerProtocol(asyncio.Protocol):
                         self.everything[data[0]][0].write("win".encode())
                     else:
                         bot_pack.kill_func([self.where[0], self.where[1], self.where[2]])
+                        self.everything[data[0]][0].write("kill".encode())
             else:  # если корабль не убит
                 self.everything[data[0]][0].write("yes".encode())  # кидаем да, ты попал, но не убил
 
@@ -391,9 +393,8 @@ class ClientServerProtocol(asyncio.Protocol):
         elif self.everything[data[0]][1] == 'kill':
             self.everything[data[0]][0].write('kill'.encode())
         else:
-            print(data)
             if len(self.everything[data[0]]) == 7 and self.everything[data[0]][1] == 'wait':
-                sleep(3)
+                # sleep(3)
                 self.for_bot_fire(data, self.everything[data[0]][6])
             self.everything[data[0]][0].write("no".encode())
 
@@ -427,6 +428,7 @@ class Bot:
             if len(self.can_fire_hit) == 1:
                 r = self.can_fire_hit[0]
             else:
+                print(self.can_fire_hit)
                 r = self.can_fire_hit[randint(0, len(self.can_fire_hit) - 1)]
             self.can_fire_hit.remove(r)
         elif len(self.hit) > 1:
@@ -466,9 +468,9 @@ class Bot:
         self.map_enemy[self.i][self.j][self.k] = 4  # попали
         self.hit.append([self.i, self.j, self.k])
         if not self.can_fire_hit:
-            self.can_fire_hit = [[i, j, k] for i in range(self.i - 1, self.i + 1, 2) if 0 <= i < self.len_cube
-                                 for j in range(self.j - 1, self.j + 1, 2) if 0 <= j < self.len_cube
-                                 for k in range(self.k - 1, self.k + 1, 2) if 0 <= k < self.len_cube]
+            self.can_fire_hit = [[i, j, k] for i in range(self.i - 1, self.i + 2, 2) if 0 <= i < self.len_cube
+                                 for j in range(self.j - 1, self.j + 2, 2) if 0 <= j < self.len_cube
+                                 for k in range(self.k - 1, self.k + 2, 2) if 0 <= k < self.len_cube]
         self.fire_func()
 
     def kill_enemy(self):  # бот убил корабль противника
@@ -476,9 +478,9 @@ class Bot:
         self.map_enemy[self.i][self.j][self.k] = 4
         self.hit.append([self.i, self.j, self.k])
         if len(self.hit) == 1:
-            c = [[i, j, k] for i in range(self.i - 1, self.i + 1, 2) if 0 <= i < self.len_cube
-                 for j in range(self.j - 1, self.j + 1, 2) if 0 <= j < self.len_cube
-                 for k in range(self.k - 1, self.k + 1, 2) if 0 <= k < self.len_cube]
+            c = [[i, j, k] for i in range(self.i - 1, self.i + 2, 2) if 0 <= i < self.len_cube
+                 for j in range(self.j - 1, self.j + 2, 2) if 0 <= j < self.len_cube
+                 for k in range(self.k - 1, self.k + 2, 2) if 0 <= k < self.len_cube]
             for i in c:
                 self.map_enemy[i[0]][i[1]][i[2]] = 3
         else:
@@ -488,9 +490,9 @@ class Bot:
                 if t1[1] == t2[1]:
                     o = max([y[2] for y in self.hit])
                     while o >= 0 and self.map_enemy[t1[0]][t1[1]][o] == 4:
-                        c = [[i, j, k] for i in range(t1[0] - 1, t1[0] + 1, 2) if 0 <= i < self.len_cube
-                             for j in range(t1[1] - 1, t1[1] + 1, 2) if 0 <= j < self.len_cube
-                             for k in range(o - 1, o + 1, 2) if 0 <= k < self.len_cube]
+                        c = [[i, j, k] for i in range(t1[0] - 1, t1[0] + 2, 2) if 0 <= i < self.len_cube
+                             for j in range(t1[1] - 1, t1[1] + 2, 2) if 0 <= j < self.len_cube
+                             for k in range(o - 1, o + 2, 2) if 0 <= k < self.len_cube]
                         for i in c:
                             if self.map_enemy[i[0]][i[1]][i[2]] == 0:
                                 self.map_enemy[i[0]][i[1]][i[2]] = 3
@@ -498,9 +500,9 @@ class Bot:
                 else:
                     o = max([y[1] for y in self.hit])
                     while o >= 0 and self.map_enemy[t1[0]][o][t1[2]] == 4:
-                        c = [[i, j, k] for i in range(t1[0] - 1, t1[0] + 1, 2) if 0 <= i < self.len_cube
-                             for j in range(o - 1, o + 1, 2) if 0 <= j < self.len_cube
-                             for k in range(t1[2] - 1, t1[2] + 1, 2) if 0 <= k < self.len_cube]
+                        c = [[i, j, k] for i in range(t1[0] - 1, t1[0] + 2, 2) if 0 <= i < self.len_cube
+                             for j in range(o - 1, o + 2, 2) if 0 <= j < self.len_cube
+                             for k in range(t1[2] - 1, t1[2] + 2, 2) if 0 <= k < self.len_cube]
                         for i in c:
                             if self.map_enemy[i[0]][i[1]][i[2]] == 0:
                                 self.map_enemy[i[0]][i[1]][i[2]] = 3
@@ -508,9 +510,9 @@ class Bot:
             else:
                 o = max([y[0] for y in self.hit])
                 while o >= 0 and self.map_enemy[o][t1[1]][t1[2]] == 4:
-                    c = [[i, j, k] for i in range(o - 1, o + 1, 2) if 0 <= i < self.len_cube
-                         for j in range(t1[1] - 1, t1[1] + 1, 2) if 0 <= j < self.len_cube
-                         for k in range(t1[2] - 1, t1[2] + 1, 2) if 0 <= k < self.len_cube]
+                    c = [[i, j, k] for i in range(o - 1, o + 2, 2) if 0 <= i < self.len_cube
+                         for j in range(t1[1] - 1, t1[1] + 2, 2) if 0 <= j < self.len_cube
+                         for k in range(t1[2] - 1, t1[2] + 2, 2) if 0 <= k < self.len_cube]
                     for i in c:
                         if self.map_enemy[i[0]][i[1]][i[2]] == 0:
                             self.map_enemy[i[0]][i[1]][i[2]] = 3
@@ -521,24 +523,28 @@ class Bot:
         self.my_map[cells[0]][cells[1]][cells[2]] = 4
         t1 = [int(p) for p in cells]
         t2 = None
-        c = [[i, j, k] for i in range(t1[0] - 1, t1[0] + 1, 2) if 0 <= i < self.len_cube
-             for j in range(t1[1] - 1, t1[1] + 1, 2) if 0 <= j < self.len_cube
-             for k in range(t1[2] - 1, t1[2] + 1, 2) if 0 <= k < self.len_cube]
+        c = [[i, j, k] for i in range(t1[0] - 1, t1[0] + 2, 2) if 0 <= i < self.len_cube
+             for j in range(t1[1] - 1, t1[1] + 2, 2) if 0 <= j < self.len_cube
+             for k in range(t1[2] - 1, t1[2] + 2, 2) if 0 <= k < self.len_cube]
         for i in c:
-            if self.map_enemy[i[0]][i[1]][i[2]] == 4:
+            if self.my_map[i[0]][i[1]][i[2]] == 4:
                 t2 = [i[0], i[1], i[2]]
+
         o = None
+
         if t2 is not None:
+
             if t1[0] == t2[0]:
+
                 if t1[1] == t2[1]:
                     o = t1[2]
                     while self.my_map[t1[0]][t1[1]][o] == 4 and o < self.len_cube:
                         o += 1
                     o -= 1
                     while o >= 0 and self.my_map[t1[0]][t1[1]][o] == 4:
-                        c = [[i, j, k] for i in range(t1[0] - 1, t1[0] + 1, 2) if 0 <= i < self.len_cube
-                             for j in range(t1[1] - 1, t1[1] + 1, 2) if 0 <= j < self.len_cube
-                             for k in range(o - 1, o + 1, 2) if 0 <= k < self.len_cube]
+                        c = [[i, j, k] for i in range(t1[0] - 1, t1[0] + 2, 2) if 0 <= i < self.len_cube
+                             for j in range(t1[1] - 1, t1[1] + 2, 2) if 0 <= j < self.len_cube
+                             for k in range(o - 1, o + 2, 2) if 0 <= k < self.len_cube]
                         for i in c:
                             if self.my_map[i[0]][i[1]][i[2]] == 0:
                                 self.my_map[i[0]][i[1]][i[2]] = 3
@@ -547,11 +553,12 @@ class Bot:
                     o = t1[1]
                     while self.my_map[t1[0]][o][t1[2]] == 4 and o < self.len_cube:
                         o += 1
+
                     o -= 1
                     while o >= 0 and self.my_map[t1[0]][o][t1[2]] == 4:
-                        c = [[i, j, k] for i in range(t1[0] - 1, t1[0] + 1, 2) if 0 <= i < self.len_cube
-                             for j in range(o - 1, o + 1, 2) if 0 <= j < self.len_cube
-                             for k in range(t1[2] - 1, t1[2] + 1, 2) if 0 <= k < self.len_cube]
+                        c = [[i, j, k] for i in range(t1[0] - 1, t1[0] + 2, 2) if 0 <= i < self.len_cube
+                             for j in range(o - 1, o + 2, 2) if 0 <= j < self.len_cube
+                             for k in range(t1[2] - 1, t1[2] + 2, 2) if 0 <= k < self.len_cube]
                         for i in c:
                             if self.my_map[i[0]][i[1]][i[2]] == 0:
                                 self.my_map[i[0]][i[1]][i[2]] = 3
@@ -560,20 +567,20 @@ class Bot:
                 o = t1[0]
                 while self.my_map[o][t1[1]][t1[2]] == 4 and o < self.len_cube:
                     o += 1
+
                 o -= 1
                 while o >= 0 and self.my_map[o][t1[1]][t1[2]] == 4:
-                    c = [[i, j, k] for i in range(o - 1, o + 1, 2) if 0 <= i < self.len_cube
-                         for j in range(t1[1] - 1, t1[1] + 1, 2) if 0 <= j < self.len_cube
-                         for k in range(t1[2] - 1, t1[2] + 1, 2) if 0 <= k < self.len_cube]
+                    c = [[i, j, k] for i in range(o - 1, o + 2, 2) if 0 <= i < self.len_cube
+                         for j in range(t1[1] - 1, t1[1] + 2, 2) if 0 <= j < self.len_cube
+                         for k in range(t1[2] - 1, t1[2] + 2, 2) if 0 <= k < self.len_cube]
                     for i in c:
                         if self.my_map[i[0]][i[1]][i[2]] == 0:
                             self.my_map[i[0]][i[1]][i[2]] = 3
                     o -= 1
         else:
             for i in c:
-                if self.map_enemy[i[0]][i[1]][i[2]] == 0:
-                    self.map_enemy[i[0]][i[1]][i[2]] = 3
-
+                if self.my_map[i[0]][i[1]][i[2]] == 0:
+                    self.my_map[i[0]][i[1]][i[2]] = 3
 
 
 if __name__ == '__main__':
