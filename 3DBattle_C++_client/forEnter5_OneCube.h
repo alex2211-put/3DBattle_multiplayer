@@ -159,20 +159,24 @@ void isCorrectYes()
         correct = true; // переменная, отвечающая за честность расстановки
         saveLengthBigCube = 1;
         forTwoPlayers = 2;
+        std::string map_for_write;
         if (forTwoPlayers == 2 && one)
         {
             std::string m;
             for (int i = 0; i < LengthBigCube; i++)
                 for (int j = 0; j < LengthBigCube; j++)
-                    for (int k = 0; k < LengthBigCube; k++)
+                    for (int k = 0; k < LengthBigCube; k++) {
                         m += std::to_string(Player1[i][j][k].getHit()) + " ";
+                        map_for_write += std::to_string(Player1[i][j][k].getHit());
+                    }
             one = false;
             forOnePaint = 0;
             forEnter = 0;
             movement = true;
-            sendServ(s, "ready " + m + " " + std::to_string(LengthBigCube));   ///отправляем ready, карту и размер поля
+            sendServ(s, "ready " + m + " " + std::to_string(LengthBigCube) + " " + std::to_string(bot));   ///отправляем ready, карту и размер поля
             readServ(s);
             waiting_window = true;
+            std::cout << map_for_write;
             return;
         }
     }

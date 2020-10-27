@@ -1,5 +1,6 @@
 import asyncio
 from random import randint
+import json
 '''
 3) Написать повторное подключение игрока к серверу по причине локального вылета из игры.
 4) Написать восстановление сервера при его неожиданном падении (файл, где хранятся действующие игры).
@@ -34,6 +35,7 @@ class ClientServerProtocol(asyncio.Protocol):
     pairs = []
     new_pair_num = [0]
     where = [-1, -1, -1]
+    pairs_bots = []
 
     def connection_made(self, transport):
         self.transport = transport
@@ -132,6 +134,9 @@ class ClientServerProtocol(asyncio.Protocol):
                         print('not_ready')
                         self.everything[data[2]][0].write('not_ready\n'.encode())
 
+                else:   # если такого ключа не нашлось
+                    self.everything[data[0]][0].write("no".encode())
+
             elif data[1] == 'end':  # окончание игры клиентом
                 try:
                     hash_with_who = self.pairs[self.everything[data[0]][4][0]][1 - self.everything[data[0]][4][1]]
@@ -149,7 +154,7 @@ class ClientServerProtocol(asyncio.Protocol):
         count = -1  # номер пары
         self.everything[data[0]].append(data[1])  # ready в словарь
         # сделан трехмерный массив для карты...
-        LengthBigCube = int(data[len(data) - 1])
+        LengthBigCube = int(data[len(data) - 2])
         count_map = 2
         battle_map = [[[0 for _ in range(LengthBigCube)] for _ in range(LengthBigCube)] for _ in range(LengthBigCube)]
         for i in range(LengthBigCube):
@@ -161,35 +166,46 @@ class ClientServerProtocol(asyncio.Protocol):
 
         self.everything[data[0]].append(LengthBigCube)  # размер поля в словарь
 
-        for i in self.pairs:
-            count += 1
-            if len(i) == 0:
-                i.append(data[0])
-                self.everything[data[0]].append((count, 0))
-                self.everything[data[0]][1] = 'ready'
-                empty = True
-            elif not len(i) == 2:
-                if self.everything[i[0]][3] == LengthBigCube:  # сверяем размер карты
-                    i.append(data[0])
+        if int(data[int(len(data)) - 1]) == 1:   # если играем с ботом
+            '''Создать комплект бота и добавить в тапл'''
+            for i in self.pairs_bots:
+                if len(i) == 0:
+                    i.append((data[0]))
                     to_pair = True
-                    self.everything[data[0]].append((count, 1))  # добавляем в словарь тапл с парой
-                    who = randint(0, 1)
-                    self.everything[data[0]][0].write(str(who).encode())  # отправляем ходит он первый или нет
-                    if who == 1:
-                        self.everything[data[0]][1] = 'fire_st'  # ставим статус что он стреляет
-                        self.everything[i[0]][1] = 'wait'  # ставим статус что он ждет
-                    else:
-                        self.everything[data[0]][1] = 'wait'
-                        self.everything[i[0]][1] = 'fire_st'
-                    self.everything[i[0]][0].write(str(1 - who).encode())  # отпраляем ходит он первый или нет
+            if not to_pair:
+                self.pairs_bots.append((data[0]))
 
-        if not to_pair and not empty:
-            self.pairs.append([data[0]])
-            self.everything[data[0]].append((len(self.pairs) - 1, 0))
-            self.everything[data[0]][1] = 'ready'
+        else:   # если хочет играть с человеком
+            for i in self.pairs:
+                count += 1
+                if len(i) == 0:
+                    i.append(data[0])
+                    self.everything[data[0]].append((count, 0))
+                    self.everything[data[0]][1] = 'ready'
+                    empty = True
+                elif not len(i) == 2:
+                    if self.everything[i[0]][3] == LengthBigCube:  # сверяем размер карты
+                        i.append(data[0])
+                        to_pair = True
+                        self.everything[data[0]].append((count, 1))  # добавляем в словарь тапл с парой
+                        who = randint(0, 1)
+                        self.everything[data[0]][0].write(str(who).encode())  # отправляем ходит он первый или нет
+                        if who == 1:
+                            self.everything[data[0]][1] = 'fire_st'  # ставим статус что он стреляет
+                            self.everything[i[0]][1] = 'wait'  # ставим статус что он ждет
+                        else:
+                            self.everything[data[0]][1] = 'wait'
+                            self.everything[i[0]][1] = 'fire_st'
+                        self.everything[i[0]][0].write(str(1 - who).encode())  # отпраляем ходит он первый или нет
+
+            if not to_pair and not empty:
+                self.pairs.append([data[0]])
+                self.everything[data[0]].append((len(self.pairs) - 1, 0))
+                self.everything[data[0]][1] = 'ready'
         ships = (1 + LengthBigCube - 2) * (
                 LengthBigCube - 2) / 2  # подсчитаем арифметической прогрессией число кораблей
         self.everything[data[0]].append(ships)  # число кораблей в словарь
+        self.everything[data[0]].append(data[int(len(data)) - 1])
         self.everything[data[0]][0].write('ok'.encode())
 
     def fire_func(self, data):
@@ -277,6 +293,35 @@ class ClientServerProtocol(asyncio.Protocol):
             self.everything[data[0]][0].write('kill'.encode())
         else:
             self.everything[data[0]][0].write("no".encode())
+
+
+class Bot:
+    def __init__(self, len_cube):
+        self.map_enemy = [[[0 for _ in range(len_cube)] for _ in range(len_cube)] for _ in range(len_cube)]
+        with open(".maps.json", 'r') as f:
+            data = json.load(f)
+            map_str = data[str(len_cube)][randint(0, len(data[len_cube]) - 1)]
+            battle_map = [[[0 for _ in range(len_cube)] for _ in range(len_cube)] for _ in range(len_cube)]
+            count_map = 0
+            for i in range(len_cube):
+                for j in range(len_cube):
+                    for k in range(len_cube):
+                        battle_map[i][j][k] = map_str[count_map]
+                        count_map += 1
+            self.my_map = battle_map
+        self.cells_empty = [[i, j, k] for k in range(len_cube) for j in range(len_cube) for i in range(len_cube)]
+        self.len_cube = len_cube
+
+    def fire_func(self):   # стреляет он
+        r = self.cells_empty[randint(0, self.len_cube**3 - 1)]
+        i, j, k = [int(p) for p in r]
+        self.cells_empty.remove(r)
+
+    def hit_func(self):   # когда стреляли в него
+        pass
+
+    def kill_func(self):   # когда убили его корабль
+        pass
 
 
 if __name__ == '__main__':
