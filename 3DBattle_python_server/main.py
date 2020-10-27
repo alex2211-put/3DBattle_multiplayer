@@ -471,7 +471,8 @@ class Bot:
             self.can_fire_hit = [[i, j, k] for i in range(self.i - 1, self.i + 2, 2) if 0 <= i < self.len_cube
                                  for j in range(self.j - 1, self.j + 2, 2) if 0 <= j < self.len_cube
                                  for k in range(self.k - 1, self.k + 2, 2) if 0 <= k < self.len_cube]
-        self.fire_func()
+        r = self.fire_func()
+        return r
 
     def kill_enemy(self):  # бот убил корабль противника
         self.can_fire_hit = []
@@ -483,6 +484,7 @@ class Bot:
                  for k in range(self.k - 1, self.k + 2, 2) if 0 <= k < self.len_cube]
             for i in c:
                 self.map_enemy[i[0]][i[1]][i[2]] = 3
+                self.cells_empty.remove([i[0], i[1], i[2]])
         else:
             t1, t2 = self.hit[0], self.hit[1]
             o = None
@@ -496,6 +498,7 @@ class Bot:
                         for i in c:
                             if self.map_enemy[i[0]][i[1]][i[2]] == 0:
                                 self.map_enemy[i[0]][i[1]][i[2]] = 3
+                                self.cells_empty.remove([i[0], i[1], i[2]])
                         o -= 1
                 else:
                     o = max([y[1] for y in self.hit])
@@ -506,6 +509,7 @@ class Bot:
                         for i in c:
                             if self.map_enemy[i[0]][i[1]][i[2]] == 0:
                                 self.map_enemy[i[0]][i[1]][i[2]] = 3
+                                self.cells_empty.remove([i[0], i[1], i[2]])
                         o -= 1
             else:
                 o = max([y[0] for y in self.hit])
@@ -516,6 +520,7 @@ class Bot:
                     for i in c:
                         if self.map_enemy[i[0]][i[1]][i[2]] == 0:
                             self.map_enemy[i[0]][i[1]][i[2]] = 3
+                            self.cells_empty.remove([i[0], i[1], i[2]])
                     o -= 1
         self.hit = []
 
