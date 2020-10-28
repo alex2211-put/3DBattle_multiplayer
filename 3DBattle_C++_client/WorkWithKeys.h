@@ -24,8 +24,9 @@ void Keyboard(unsigned char key, int x, int y)
         if (menupuncts[0])
         {
             menupuncts[0] = false;
+            if (tileschange)
+                bot_player_window = true;
             tileschange = false;
-            bot_player_window = true;
         } else
         {
             if (menupuncts[1])
@@ -94,12 +95,12 @@ void Keyboard(unsigned char key, int x, int y)
         forEnter3Function();
     }
 
-    if (key == 13 && forEnter == 5 && forTwoPlayers < 2)
+    else if (key == 13 && forEnter == 5 && forTwoPlayers < 2)
     {//FIRE!!! (типа пыжь пыжь и все покраснело)
         forEnter5FunctionOne();
     }
 
-    if (key == 13 && forEnter == 5 && forTwoPlayers == 2)
+    else if (key == 13 && forEnter == 5 && forTwoPlayers == 2)
     {//FIRE!!! (типа пыжь пыжь и все покраснело)
         forEnter5FunctionTwo();
     }
@@ -322,12 +323,10 @@ void specialKeys(int key, int x, int y)
             if (forTwoPlayers < 2)
                 ChooseCube(1);
             else ChooseCube2(1);
-            forEnter = 5;
         } else if (key == GLUT_KEY_PAGE_DOWN && (forEnter == 4 || forEnter == 5)) {
             if (forTwoPlayers < 2)
                 ChooseCube(2);
             else ChooseCube2(2);
-            forEnter = 5;
         }
 
 

@@ -394,8 +394,10 @@ class ClientServerProtocol(asyncio.Protocol):
         else:
             if len(self.everything[data[0]]) == 7 and self.everything[data[0]][1] == 'wait':
                 # sleep(3)
+                self.everything[data[0]][0].write("no".encode())
                 self.for_bot_fire(data, self.everything[data[0]][6])
-            self.everything[data[0]][0].write("no".encode())
+            else:
+                self.everything[data[0]][0].write("no".encode())
 
 
 class Bot:

@@ -209,7 +209,7 @@ void forEnter3Function()
             r_rotate_y = 135;
         }
     }
-    forEnter = 4;
+    forEnter = 5;
 }
 
 #endif //INC_3DSEEBUTTLE_FORENTER3_H

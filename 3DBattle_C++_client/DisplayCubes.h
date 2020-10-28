@@ -146,6 +146,67 @@ void twoBigCubes()
                     }
                 }
 
+
+    if (isPlayer1 && forTwoPlayers == 2)
+    {
+        glBegin(GL_TRIANGLES);
+        glColor4f(1,0,0, 0.7);// Сделали боковую сторону фиолетовой
+
+        glVertex3f( 0.05, -0.05,-0.01);
+        glVertex3f(-0.1, 0.05,0.1);
+        glVertex3f(-0.1, -0.1, 0.1);
+        glEnd();
+
+        glBegin(GL_TRIANGLES);
+        glColor4f(1,0,0, 0.7); // Сделали боковую сторону желтой
+
+        glVertex3f( 0.05, -0.05,-0.01);
+        glVertex3f(-0.1, 0.05,0.1);
+        glVertex3f(0.1,-0.05,0.2);
+        glEnd();
+
+        glBegin(GL_TRIANGLES);
+        glColor4f(1,0,0, 0.7);// Сделали сторону  розовой
+
+        glVertex3f(0.05, -0.05,-0.01);
+        glVertex3f(0.1,-0.05,0.2);
+        glVertex3f(-0.1, -0.1, 0.1);
+        glEnd();
+
+        glBegin(GL_TRIANGLES);
+        glColor4f(1,0,0, 0.7);  // Сделали сторону  светло зеленой
+
+        glVertex3f(-0.1, -0.1, 0.1);
+        glVertex3f(0.1,-0.05,0.2);
+        glVertex3f(-0.1, 0.05,0.1);
+        glEnd();
+    } else if (!isPlayer1 && forTwoPlayers == 2)
+    {
+        glBegin(GL_TRIANGLES);
+        glColor4f(0,1,0, 0.7);// Сделали боковую сторону фиолетовой
+
+        glVertex3f( 0, -0.05,0.2);
+        glVertex3f(0.05, 0.05,0.05);
+        glVertex3f(0.1, -0.1, 0.05);
+        glEnd();
+
+        glBegin(GL_TRIANGLES);
+        glColor4f(0, 1, 0, 0.7); // Сделали боковую сторону желтой
+
+        glVertex3f( 0, -0.05,0.2);
+        glVertex3f(0.05, 0.05,0.05);
+        glVertex3f(-0.08, -0.11,0.05);
+        glEnd();
+
+        glBegin(GL_TRIANGLES);
+        glColor4f(0, 1, 0, 0.7);// Сделали сторону  розовой
+
+        glVertex3f(0.1, -0.1, 0.05);
+        glVertex3f(0, -0.05,0.2);
+        glVertex3f(-0.08, -0.11,0.05);
+        glEnd();
+    }
+
 }
 
 void oneBigCube()
