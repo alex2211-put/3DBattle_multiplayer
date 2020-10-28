@@ -219,11 +219,9 @@ class ClientServerProtocol(asyncio.Protocol):
 
     def for_bot_fire(self, data, bot):
         sleep(0.5)
-        print('bot_fire')
         map_enemy = None
         if not bot.fire:
             self.where[0], self.where[1], self.where[2] = [int(i) for i in bot.fire_func()]
-            print(self.where[0], self.where[1], self.where[2])
         else:
             self.where[0], self.where[1], self.where[2] = [int(i) for i in bot.after_hit()]
         map_enemy = self.everything[data[0]][2]
@@ -384,10 +382,11 @@ class ClientServerProtocol(asyncio.Protocol):
             self.everything[data[0]][0].write("hurt".encode())
         elif self.everything[data[0]][1] == 'fail' or self.everything[data[0]][1] == 'win':
             self.everything[data[0]][0].write((self.everything[data[0]][1]).encode())
-            hash_with_who = self.pairs[self.everything[data[0]][4][0]][1 - self.everything[data[0]][4][1]]
-            if len(self.everything[data[0]]) == 7:
+            if not len(self.everything[data[0]]) == 7:
+                hash_with_who = self.pairs[self.everything[data[0]][4][0]][1 - self.everything[data[0]][4][1]]
+            if len(self.everything[data[0]]) != 7:
                 del self.everything[hash_with_who]
-            self.pairs[self.everything[data[0]][4][0]] = []
+                self.pairs[self.everything[data[0]][4][0]] = []
             del self.everything[data[0]]
 
         elif self.everything[data[0]][1] == 'kill':
@@ -429,6 +428,7 @@ class Bot:
                 r = self.can_fire_hit[0]
             else:
                 print(self.can_fire_hit)
+                print(self.hit)
                 r = self.can_fire_hit[randint(0, len(self.can_fire_hit) - 1)]
             self.can_fire_hit.remove(r)
         elif len(self.hit) > 1:
@@ -459,7 +459,10 @@ class Bot:
         else:
             r = self.cells_empty[randint(0, len(self.cells_empty) - 1)]
         i, j, k = [int(p) for p in r]
-        self.cells_empty.remove(r)
+        try:
+            self.cells_empty.remove(r)
+        except:
+            r = self.fire_func()
         self.map_enemy[i][j][k] = 3  # промахнулись
         self.i, self.j, self.k = i, j, k  # запоминаем координаты последнего выстрела
         return r
@@ -468,9 +471,24 @@ class Bot:
         self.map_enemy[self.i][self.j][self.k] = 4  # попали
         self.hit.append([self.i, self.j, self.k])
         if not self.can_fire_hit:
-            self.can_fire_hit = [[i, j, k] for i in range(self.i - 1, self.i + 2, 2) if 0 <= i < self.len_cube
-                                 for j in range(self.j - 1, self.j + 2, 2) if 0 <= j < self.len_cube
-                                 for k in range(self.k - 1, self.k + 2, 2) if 0 <= k < self.len_cube]
+            if self.i - 1 >= 0:
+                self.can_fire_hit.append([self.i - 1, self.j, self.k])
+            if self.i + 1 < self.len_cube:
+                self.can_fire_hit.append([self.i + 1, self.j, self.k])
+            if self.j - 1 >= 0:
+                self.can_fire_hit.append([self.i, self.j - 1, self.k])
+            if self.j + 1 < self.len_cube:
+                self.can_fire_hit.append([self.i, self.j + 1, self.k])
+            if self.k - 1 >= 0:
+                self.can_fire_hit.append([self.i, self.j, self.k - 1])
+            if self.k + 1 < self.len_cube:
+                self.can_fire_hit.append([self.i, self.j, self.k + 1])
+            try:
+                counts = self.can_fire_hit.count([-1, -1, -1])
+                for _ in range(counts):
+                    self.can_fire_hit.remove([-1, -1, -1])
+            except:
+                pass
         r = self.fire_func()
         return r
 
@@ -479,12 +497,22 @@ class Bot:
         self.map_enemy[self.i][self.j][self.k] = 4
         self.hit.append([self.i, self.j, self.k])
         if len(self.hit) == 1:
-            c = [[i, j, k] for i in range(self.i - 1, self.i + 2, 2) if 0 <= i < self.len_cube
-                 for j in range(self.j - 1, self.j + 2, 2) if 0 <= j < self.len_cube
-                 for k in range(self.k - 1, self.k + 2, 2) if 0 <= k < self.len_cube]
+            c = [[i, j, k] if [i, j, k] in self.cells_empty else [-1, -1, -1]
+                                 for i in range(self.i - 1, self.i + 2, 2) if 0 <= i < self.len_cube
+                                 for j in range(self.j - 1, self.j + 2, 2) if 0 <= j < self.len_cube
+                                 for k in range(self.k - 1, self.k + 2, 2) if 0 <= k < self.len_cube]
+            try:
+                counts = self.can_fire_hit.count([-1, -1, -1])
+                for _ in range(counts):
+                    self.can_fire_hit.remove([-1, -1, -1])
+            except:
+                pass
             for i in c:
-                self.map_enemy[i[0]][i[1]][i[2]] = 3
-                self.cells_empty.remove([i[0], i[1], i[2]])
+                try:
+                    self.map_enemy[i[0]][i[1]][i[2]] = 3
+                    self.cells_empty.remove([i[0], i[1], i[2]])
+                except:
+                    pass
         else:
             t1, t2 = self.hit[0], self.hit[1]
             o = None
