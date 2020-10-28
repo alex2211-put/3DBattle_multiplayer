@@ -100,7 +100,7 @@ void forEnter1Function()
             }
         }
     }
-    forEnter = 2;
+    forEnter = 3;
     movement = false;
 }
 

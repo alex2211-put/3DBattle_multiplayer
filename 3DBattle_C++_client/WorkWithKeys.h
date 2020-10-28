@@ -90,7 +90,7 @@ void Keyboard(unsigned char key, int x, int y)
         forEnter1Function();
     }
 
-    if (key == 13 && forEnter == 3)
+    else if (key == 13 && forEnter == 3)
     {
         forEnter3Function();
     }
