@@ -55,7 +55,12 @@ void displayCell()
                 GL_ONE_MINUS_SRC_ALPHA);  //устанавливаем уровень прозрачности - пока до конца не разобрался
 
     menupuncts[carrier] = true;     // С помощью него листаем меню
-    if (mainmenu)
+    if (server_window)
+    {
+        glColor3d(1, 1, 1);
+        renderBitmapString(-0.3, 0, GLUT_BITMAP_TIMES_ROMAN_24, "Waiting for a connection to the server");
+    }
+    else if (mainmenu)
     {             // Начало игры. Отсюда и до 141 строки даже не копайтесь в коде
         mainMenuFunction();
     } else if (end1)

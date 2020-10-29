@@ -19,6 +19,7 @@ std::string hash;
 bool waiting_window = false;
 bool bot_player_window = false;
 bool bot = false;
+bool server_window = false;
 unsigned int carrier_bot = 0;
 
 
@@ -37,6 +38,8 @@ int init_sock() {
         perror("oops: client");
         return -1;
     }
+    server_window = false;
+    glutPostRedisplay();
     return s;
 }
 
