@@ -27,20 +27,20 @@ int init_sock() {
     int len;
     sockaddr_in address{};
     int result;
-    int s;
-    s = socket(AF_INET, SOCK_STREAM,0);
+    int s1;
+    s1 = socket(AF_INET, SOCK_STREAM,0);
     address.sin_family = AF_INET;   // интернет домен
     address.sin_addr.s_addr = inet_addr("127.0.0.1");   ///соединяемся с 127.0.0.1
     address.sin_port = htons(5000);    /// 5000 порт
     len = sizeof(address);
-    result = connect(s, (sockaddr *)&address, len);   ///установка соединения
+    result = connect(s1, (sockaddr *)&address, len);   ///установка соединения
     if (result == -1) {
         perror("oops: client");
         return -1;
     }
     server_window = false;
     glutPostRedisplay();
-    return s;
+    return s1;
 }
 
 std::string readServ(int s) {

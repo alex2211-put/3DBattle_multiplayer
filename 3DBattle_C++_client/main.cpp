@@ -6,6 +6,8 @@
 #include "WorkWithKeys.h"  //работа с клавиатурой
 #include "client.h"
 //много всего и всё служебное
+double time_serv = 0;
+
 void socket_starting_work()
 {
     std::ifstream file;
@@ -17,7 +19,6 @@ void socket_starting_work()
         std::string word;
         fin >> word;   // считаем файл
         if (word.empty()) {   // если пустой файл
-            s = init_sock(); // подключаем сокет
             if (s != -1)
             {
                 hash = readServ(s);  // получаем хэш
@@ -28,7 +29,6 @@ void socket_starting_work()
             }
         }
         else {
-            s = init_sock();
             if (s != -1) {
                 hash = readServ(s);   /// если файл не пустой, то считываем хэш и ... реализовываем))) потом..
                 sendServ(s, "back " + word);   // отправляем что мы вернулись назад после поломки локальной
@@ -127,7 +127,6 @@ void socket_starting_work()
     }
     else   // если не существует
     {
-        s = init_sock(); // подключаем сокет
         if (s != -1) {
             hash = readServ(s);  // получаем хэш
             std::ofstream fout(
@@ -137,12 +136,28 @@ void socket_starting_work()
         }
     }
 }
+
 void Rotate(int value)
 {
-    if (s == -1)
-    {
-        server_window = true;
-        socket_starting_work();
+    if (s == -1) {
+        if (time_serv == 0) {
+            time_serv = get_time();
+            server_window = true;
+        } else if (get_time() - time_serv > 1)
+        {
+            time_serv = get_time();
+            server_window = true;
+            glutPostRedisplay();
+            try {
+                s = init_sock();
+                if (s != -1)
+                    socket_starting_work();
+            }
+            catch (...) {
+                s = -1;
+            }
+
+        }
     }
     else if(waiting_window)
     {
@@ -239,7 +254,9 @@ int main(int argc, char *argv[])
     glutCreateWindow("Awesome Cube");  //это название создающегося окна
     glEnable(GL_DEPTH_TEST);  //тест глубины или что-то такое
 
+    s = init_sock();
     socket_starting_work();
+
 
     glutDisplayFunc(displayCell);  //вызвываем функцию, которая рисует кубы
     glutKeyboardFunc(Keyboard);
