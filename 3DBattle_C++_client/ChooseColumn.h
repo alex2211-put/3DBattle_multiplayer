@@ -168,14 +168,14 @@ void forFirstSideTwoPlayers(int arrow)
                 Player2[i][yf][z1].setColor(255 / 255., 105 / 255., 60 / 255.);
                 if (Player2[i][yf][z1].getHit() == 3)
                     Player2[i][yf][z1].setRed(true);
-                Player2[i][yf][z1].setTransparency(1);
+                Player2[i][yf][z1].setTransparency(0.8);
             }
 
         }
         if (Player2[LengthBigCube - 1][yf][z1].getHit() >= 3)
         {
             Player2[LengthBigCube - 1][yf][z1].setColor(255 / 255., 105 / 255., 60 / 255.);
-            Player2[LengthBigCube - 1][yf][z1].setTransparency(1);
+            Player2[LengthBigCube - 1][yf][z1].setTransparency(0.8);
             Player2[LengthBigCube - 1][yf][z1].setRed(true);
         } else
         {
@@ -348,14 +348,14 @@ void forSecondTwoPlayers(int arrow)
                 Player2[x2][i][z2].setColor(255 / 255., 105 / 255., 60 / 255.);
                 if (Player2[x2][i][z2].getHit() == 3)
                     Player2[x2][i][z2].setRed(true);
-                Player2[x2][i][z2].setTransparency(1);
+                Player2[x2][i][z2].setTransparency(0.8);
             }
 
         }
         if (Player2[x2][LengthBigCube - 1][z2].getHit() >= 3)
         {
             Player2[x2][LengthBigCube - 1][z2].setColor(255 / 255., 105 / 255., 60 / 255.);
-            Player2[x2][LengthBigCube - 1][z2].setTransparency(1);
+            Player2[x2][LengthBigCube - 1][z2].setTransparency(0.8);
             Player2[x2][LengthBigCube - 1][z2].setRed(true);
         } else
         {
@@ -528,14 +528,14 @@ void forThirdTwoPlayers(int arrow)
                 Player2[x3][y3][i].setColor(255 / 255., 105 / 255., 60 / 255.);
                 if (Player2[x3][y3][i].getHit() == 3)
                     Player2[x3][y3][i].setRed(true);
-                Player2[x3][y3][i].setTransparency(1);
+                Player2[x3][y3][i].setTransparency(0.8);
             }
 
         }
         if (Player2[x3][y3][LengthBigCube - 1].getHit() >= 3)
         {
             Player2[x3][y3][LengthBigCube - 1].setColor(255 / 255., 105 / 255., 60 / 255.);
-            Player2[x3][y3][LengthBigCube - 1].setTransparency(1);
+            Player2[x3][y3][LengthBigCube - 1].setTransparency(0.8);
             Player2[x3][y3][LengthBigCube - 1].setRed(true);
         } else
         {

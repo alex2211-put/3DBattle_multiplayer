@@ -217,12 +217,14 @@ def fire_func(data, everything, pairs, where):
         else:  # если корабль не убит
             everything[data[0]][0].write("yes".encode())  # кидаем да, ты попал, но не убил
 
+    elif int(map_enemy[where[0]][where[1]][where[2]]) == 3 or int(map_enemy[where[0]][where[1]][where[2]]) == 4:
+        everything[data[0]][0].write("again".encode())
 
     else:
         everything[data[0]][0].write("no".encode())  # кидаем нет
         everything[data[0]][1] = 'wait'  # меняем статус
         if not bot:
-            everything[hash_with_who][1] = 'fire'  # меняем статус
+            everything[hash_with_who][1] = 'fire'  # меняем статус у соперника
         map_enemy[where[0]][where[1]][where[2]] = 3
 
 

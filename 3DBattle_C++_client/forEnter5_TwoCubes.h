@@ -7,6 +7,8 @@
 
 #include "hitSide_Player1.h"
 #include "hitSide_Player2.h"
+#include <chrono>
+
 
 void forEnter5FunctionTwo()
 {
@@ -174,7 +176,7 @@ void forEnter5FunctionTwo()
             sendServ(s, "fire " + std::to_string(p1) + " " + std::to_string(yf) + " " + std::to_string(z1));
             std::string answer = readServ(s);
             //std::cout << std::endl << "данные от сервера начальные: " << answer;
-            if (answer != "yes" && answer != "no" && answer != "kill" && answer != "win")
+            if (answer != "yes" && answer != "no" && answer != "kill" && answer != "win" && answer != "again")
             {
                 answer = readServ(s);
                 std::cout << "Переполучение данных\n";
@@ -222,6 +224,26 @@ void forEnter5FunctionTwo()
             {
                end2 = true;
             }
+            else if (answer == "again")   // если стреляли по той же клетке
+            {
+                glClearColor(0.5, 0, 0, 0.f);
+                red_time = get_time();
+                for (auto &i : Player2)
+                {
+                    i[yf][z1].setColor(0.5, 0.5, 0.8);
+                    i[yf][z1].setTransparency(0.11);
+                }
+                if (Player2[p1][yf][z1].getHit() == 3)
+                {
+                    Player2[p1][yf][z1].setColor(0, 0, 1);
+                    Player2[p1][yf][z1].setTransparency(0.35);
+                }
+                else
+                {
+                    Player2[p1][yf][z1].setColor(1, 0, 0);
+                    Player2[p1][yf][z1].setTransparency(0.35);
+                }
+            }
             else
             {
                 std::cout << "Неверные данные при получение ответа на выстрел (сторона 1)" << std::endl << answer;
@@ -267,7 +289,7 @@ void forEnter5FunctionTwo()
             std::cout << "получили от сервера (2Side) "  << answer << std::endl;
             //std::cout << std::endl << "данные от сервера начальные: " << answer;
 
-            if (answer != "yes" && answer != "no" && answer != "kill" && answer != "win")
+            if (answer != "yes" && answer != "no" && answer != "kill" && answer != "win" && answer != "again")
             {
                 answer = readServ(s);
                 std::cout << "Переполучение данных\n";
@@ -313,6 +335,26 @@ void forEnter5FunctionTwo()
             {
                 end2 = true;
             }
+            else if (answer == "again")   // если стреляли по той же клетке
+            {
+                glClearColor(0.5, 0, 0, 0.f);
+                red_time = get_time();
+                for (int j = 0; j < LengthBigCube; j++)
+                {
+                    Player2[x2][j][z2].setColor(0.5, 0.5, 0.8);
+                    Player2[x2][j][z2].setTransparency(0.11);
+                }
+                if (Player2[x2][p2][z2].getHit() == 3)
+                {
+                    Player2[x2][p2][z2].setColor(0, 0, 1);
+                    Player2[x2][p2][z2].setTransparency(0.35);
+                }
+                else
+                {
+                    Player2[x2][p2][z2].setColor(1, 0, 0);
+                    Player2[x2][p2][z2].setTransparency(0.35);
+                }
+            }
             else
                 std::cout << "Неверные данные при получение ответа на выстрел (сторона 2) " << answer << std::endl;
 
@@ -355,7 +397,7 @@ void forEnter5FunctionTwo()
             std::cout << "получили от сервера (3Side) "  << answer << std::endl;
             //std::cout << std::endl << "данные от сервера начальные: " << answer;
 
-            if (answer != "yes" && answer != "no" && answer != "kill" && answer != "win")
+            if (answer != "yes" && answer != "no" && answer != "kill" && answer != "win" && answer != "again")
             {
                 answer = readServ(s);
                 std::cout << "Переполучение данных\n";
@@ -396,7 +438,27 @@ void forEnter5FunctionTwo()
             if (answer == "win")   // если попали, но не убили
             {
                 end2 = true;
-            } else
+            }
+            else if (answer == "again")   // если стреляли по той же клетке
+            {
+                glClearColor(0.5, 0, 0, 0.f);
+                red_time = get_time();
+                for (int k = 0; k < LengthBigCube; k++) {
+                    Player2[x3][y3][k].setColor(0.5, 0.5, 0.8);
+                    Player2[x3][y3][k].setTransparency(0.11);
+                }
+                if (Player2[x3][y3][p3].getHit() == 3)
+                {
+                    Player2[x3][y3][p3].setColor(0, 0, 1);
+                    Player2[x3][y3][p3].setTransparency(0.35);
+                }
+                else
+                {
+                    Player2[x3][y3][p3].setColor(1, 0, 0);
+                    Player2[x3][y3][p3].setTransparency(0.35);
+                }
+            }
+            else
                 std::cout << "Неверные данные при получение ответа на выстрел (сторона 3)";
             /*} else if (thirdSide && Player2[x3][y3][p3].getHit() == 1)
             {

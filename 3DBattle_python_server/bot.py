@@ -26,18 +26,11 @@ class Bot:
         self.fire = False
 
     def fire_func(self):  # стреляет бот
-        r = None
         if len(self.hit) == 1:
-            if len(self.can_fire_hit) == 1:
-                r = self.can_fire_hit[0]
-            else:
-                #print(self.can_fire_hit)
-               # print(self.hit)
-                r = self.can_fire_hit[randint(0, len(self.can_fire_hit) - 1)]
+            r = self.can_fire_hit[randint(0, len(self.can_fire_hit) - 1)]
             self.can_fire_hit.remove(r)
         elif len(self.hit) > 1:
             t1, t2 = self.hit[len(self.hit) - 1], self.hit[len(self.hit) - 2]
-            r = []
             if t1[0] == t2[0]:
                 if t1[1] == t2[1]:
                     o = [max([y[2] + 1 if y[2] + 1 < self.len_cube and self.map_enemy[y[0]][y[1]][y[2] + 1] == 0 else
@@ -93,8 +86,7 @@ class Bot:
                     self.can_fire_hit.remove([-1, -1, -1])
             except:
                 pass
-        r = self.fire_func()
-        return r
+        return self.fire_func()
 
     def kill_enemy(self):  # бот убил корабль противника
         self.can_fire_hit = []
@@ -102,9 +94,9 @@ class Bot:
         self.hit.append([self.i, self.j, self.k])
         if len(self.hit) == 1:
             c = [[i, j, k] if [i, j, k] in self.cells_empty else [-1, -1, -1]
-                                 for i in range(self.i - 1, self.i + 2, 2) if 0 <= i < self.len_cube
-                                 for j in range(self.j - 1, self.j + 2, 2) if 0 <= j < self.len_cube
-                                 for k in range(self.k - 1, self.k + 2, 2) if 0 <= k < self.len_cube]
+                 for i in range(self.i - 1, self.i + 2, 2) if 0 <= i < self.len_cube
+                 for j in range(self.j - 1, self.j + 2, 2) if 0 <= j < self.len_cube
+                 for k in range(self.k - 1, self.k + 2, 2) if 0 <= k < self.len_cube]
             try:
                 counts = self.can_fire_hit.count([-1, -1, -1])
                 for _ in range(counts):

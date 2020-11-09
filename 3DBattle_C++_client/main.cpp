@@ -139,6 +139,13 @@ void socket_starting_work()
 
 void Rotate(int value)
 {
+    if (red_time != 0 && get_time() - red_time > 0.5)
+    {
+        std::cout << "more" << std::endl;
+        red_time = 0;
+        glClearColor(0.07, 0.07, 0.25, 0.f);
+        glutPostRedisplay();
+    }
     if (s == -1) {
         if (time_serv == 0) {
             time_serv = get_time();
@@ -214,6 +221,7 @@ void Rotate(int value)
         }
         else if (t == "kill")
         {
+            std::cout << "нас убили" << std::endl;
             sendServ(s, "kill_sec");
             std::string t3 = readServ(s);
             std::stringstream ss(t3);

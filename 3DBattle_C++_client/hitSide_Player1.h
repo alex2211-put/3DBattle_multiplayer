@@ -7,11 +7,10 @@
 
 void hitFirstSide1()
 {
-    shipsLifeFirst--;
     if (p1 - 1 >= 0 && Player1[p1 - 1][yf][z1].getHit() == 4)
     {
         {
-            int length = 1;
+            int length = 0;
             int _x = p1;
             while (_x >= 0 && Player1[_x][yf][z1].getHit() == 4)
             {
@@ -34,17 +33,17 @@ void hitFirstSide1()
     } else if (p1 + 1 < LengthBigCube && Player1[p1 + 1][yf][z1].getHit() == 4)
     {
         {
-            int length = 1;
+            int length = 0;
             int _x = p1;
             while (_x < LengthBigCube && Player1[_x][yf][z1].getHit() == 4)
             {
                 _x++;
-                length++;
             }
             _x--;
             while (_x >= 0 && Player1[_x][yf][z1].getHit() == 4)
             {
                 _x--;
+                length++;
             }
 
             for (int i = _x; i <= _x + length + 1; i++)

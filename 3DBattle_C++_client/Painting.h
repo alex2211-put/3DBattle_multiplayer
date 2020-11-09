@@ -38,7 +38,9 @@ void displayCell()
         first = false;
     }
     if (forEnter == -1)
+    {
         glClearColor(0.07, 0.07, 0.25, 0.f);  //меняем цвет фона
+    }
     sprintf(&text3[7], "%i", LengthBigCube);    // Размер поля в главном меню
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); //очищаем экран, чтобы картинки "не размножались"
@@ -111,6 +113,7 @@ void displayCell()
         if (points > 45)
             points = 0;
     } else {
+
         glMatrixMode(GL_PROJECTION);
         glLoadIdentity();
         glOrtho(-1.5, 1.5, -1, 1, 1, -1);

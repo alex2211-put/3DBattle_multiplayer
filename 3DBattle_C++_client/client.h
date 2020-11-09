@@ -18,6 +18,8 @@ int s;
 std::string hash;
 bool waiting_window = false;
 bool bot_player_window = false;
+bool red_window = false;
+double red_time = 0;
 bool bot = false;
 bool server_window = false;
 unsigned int carrier_bot = 0;

@@ -186,7 +186,7 @@ void ChooseCube2(int page)
                 if (Player2[p1][yf][z1].getHit() == 4 || Player2[p1][yf][z1].getHit() == 3)
                 {
                     Player2[p1][yf][z1].setColor(255 / 255., 105 / 255., 60 / 255.);
-                    Player2[p1][yf][z1].setTransparency(0.15);
+                    Player2[p1][yf][z1].setTransparency(0.7);
                 }
                 if (Player2[p1][yf][z1].getHit() != 4 && Player2[p1][yf][z1].getHit() != 3)
                     Player2[p1][yf][z1].setTransparency(0.7);
@@ -199,7 +199,7 @@ void ChooseCube2(int page)
                 if (Player2[p1][yf][z1].getHit() == 4 || Player2[p1][yf][z1].getHit() == 3)
                 {
                     Player2[p1][yf][z1].setColor(255 / 255., 105 / 255., 60 / 255.);
-                    Player2[p1][yf][z1].setTransparency(0.15);
+                    Player2[p1][yf][z1].setTransparency(0.7);
                 }
                 if (Player2[p1][yf][z1].getHit() != 4 && Player2[p1][yf][z1].getHit() != 3)
                     Player2[p1][yf][z1].setTransparency(0.7);
@@ -215,7 +215,7 @@ void ChooseCube2(int page)
                 if (Player2[x2][p2][z2].getHit() == 4 || Player2[x2][p2][z2].getHit() == 3)
                 {
                     Player2[x2][p2][z2].setColor(255 / 255., 105 / 255., 60 / 255.);
-                    Player2[x2][p2][z2].setTransparency(0.15);
+                    Player2[x2][p2][z2].setTransparency(0.7);
                 }
                 if (Player2[x2][p2][z2].getHit() != 4 && Player2[x2][p2][z2].getHit() != 3)
                     Player2[x2][p2][z2].setTransparency(0.7);
@@ -228,7 +228,7 @@ void ChooseCube2(int page)
                 if (Player2[x2][p2][z2].getHit() == 4 || Player2[x2][p2][z2].getHit() == 3)
                 {
                     Player2[x2][p2][z2].setColor(255 / 255., 105 / 255., 60 / 255.);
-                    Player2[x2][p2][z2].setTransparency(0.15);
+                    Player2[x2][p2][z2].setTransparency(0.7);
                 }
                 if (Player2[x2][p2][z2].getHit() != 4 && Player2[x2][p2][z2].getHit() != 3)
                     Player2[x2][p2][z2].setTransparency(0.7);
@@ -244,7 +244,7 @@ void ChooseCube2(int page)
                 if (Player2[x3][y3][p3].getHit() == 4 || Player2[x3][y3][p3].getHit() == 3)
                 {
                     Player2[x3][y3][p3].setColor(255 / 255., 105 / 255., 60 / 255.);
-                    Player2[x3][y3][p3].setTransparency(0.15);
+                    Player2[x3][y3][p3].setTransparency(0.7);
                 }
                 if (Player2[x3][y3][p3].getHit() != 4 && Player2[x3][y3][p3].getHit() != 3)
                     Player2[x3][y3][p3].setTransparency(0.7);
@@ -257,7 +257,7 @@ void ChooseCube2(int page)
                 if (Player2[x3][y3][p3].getHit() == 4 || Player2[x3][y3][p3].getHit() == 3)
                 {
                     Player2[x3][y3][p3].setColor(255 / 255., 105 / 255., 60 / 255.);
-                    Player2[x3][y3][p3].setTransparency(0.15);
+                    Player2[x3][y3][p3].setTransparency(0.7);
                 }
                 if (Player2[x3][y3][p3].getHit() != 4 && Player2[x3][y3][p3].getHit() != 3)
                     Player2[x3][y3][p3].setTransparency(0.7);
