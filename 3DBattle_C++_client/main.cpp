@@ -164,10 +164,14 @@ void Rotate(int value)
         isPlayer1 = true;
         std::string t;
         sendServ(s, "when");
+        std::cout << "Отправили when" << std::endl;
         t = readServ(s);
+        std::cout << "Получили после when" << std::endl;
         if(t == "started\n")
         {
+            std::cout << "готовы ждать кто ходит первый" << std::endl;
             isPlayer1 = readServ(s) == "0";  //расставляет слева. Если приходит 1, то начинает стрелять наш игрок
+            std::cout << "получили кто первый ходит" << std::endl;
             waiting_window = false;
             glutPostRedisplay();
         }

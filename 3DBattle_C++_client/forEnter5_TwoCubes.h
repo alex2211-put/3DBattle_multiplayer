@@ -168,8 +168,9 @@ void forEnter5FunctionTwo()
 
     } else
     {
-        if (firstSide)// && (Player2[p1][yf][z1].getHit() == 0 || Player2[p1][yf][z1].getHit() == 2))
+        if (firstSide)
         {
+            std::cout << "отсылаем на сервер (1Side) " << std::to_string(p1) + " " + std::to_string(yf) + " " + std::to_string(z1) << std::endl;
             sendServ(s, "fire " + std::to_string(p1) + " " + std::to_string(yf) + " " + std::to_string(z1));
             std::string answer = readServ(s);
             //std::cout << std::endl << "данные от сервера начальные: " << answer;
@@ -258,17 +259,19 @@ void forEnter5FunctionTwo()
             }
             if (shipsLifeSecond == 0)
                 end2 = true;*/
-        else if (secondSide)// && (Player2[x2][p2][z2].getHit() == 0 || Player2[x2][p2][z2].getHit() == 2))
+        else if (secondSide)
         {
+            std::cout << "отсылаем на сервер(2Side) " << std::to_string(x2) + " " + std::to_string(p2) + " " + std::to_string(z2) << std::endl;
             sendServ(s, "fire " + std::to_string(x2) + " " + std::to_string(p2) + " " + std::to_string(z2));
             std::string answer = readServ(s);
+            std::cout << "получили от сервера (2Side) "  << answer << std::endl;
             //std::cout << std::endl << "данные от сервера начальные: " << answer;
 
             if (answer != "yes" && answer != "no" && answer != "kill" && answer != "win")
             {
                 answer = readServ(s);
                 std::cout << "Переполучение данных\n";
-            }
+            } else
             if (answer == "yes")   // если попали, но не убили
             {
                 for (int j = 0; j < LengthBigCube; j++)
@@ -292,26 +295,26 @@ void forEnter5FunctionTwo()
                 Player2[x2][p2][z2].setTransparency(0.35);
                 Player2[x2][p2][z2].setIsHitten(3);
                 isPlayer1 = true;
-            }
+            } else
             if (answer == "kill")   // если попали, но не убили
             {
-                for (auto &i : Player2)
+                for (int j = 0; j < LengthBigCube; j++)
                 {
-                    i[yf][z1].setColor(0.5, 0.5, 0.8);
-                    i[yf][z1].setTransparency(0.11);
+                    Player2[x2][j][z2].setColor(0.5, 0.5, 0.8);
+                    Player2[x2][j][z2].setTransparency(0.11);
                 }
 
-                Player2[p1][yf][z1].setColor(1, 0, 0);
-                Player2[p1][yf][z1].setTransparency(0.35);
-                Player2[p1][yf][z1].setIsHitten(4);
+                Player2[x2][p2][z2].setColor(1, 0, 0);
+                Player2[x2][p2][z2].setTransparency(0.35);
+                Player2[x2][p2][z2].setIsHitten(4);
                 hitSecondSide2();
-            }
+            } else
             if (answer == "win")   // если попали, но не убили
             {
                 end2 = true;
             }
             else
-                std::cout << "Неверные данные при получение ответа на выстрел (сторона 2)";
+                std::cout << "Неверные данные при получение ответа на выстрел (сторона 2) " << answer << std::endl;
 
         /*} else if (secondSide && Player2[x2][p2][z2].getHit() == 1)
         {
@@ -344,22 +347,24 @@ void forEnter5FunctionTwo()
             if (shipsLifeSecond == 0)
                 end2 = true;
                 */
-        } else if (thirdSide)// && (Player2[x3][y3][p3].getHit() == 0 || Player2[x3][y3][p3].getHit() == 2))
+        } else if (thirdSide)
         {
-            sendServ(s, "fire " + std::to_string(x3) + " " + std::to_string(p3) + " " + std::to_string(p3));
+            std::cout << "отсылаем на сервер(3Side) " <<  std::to_string(x3) + " " + std::to_string(y3) + " " + std::to_string(p3) << std::endl;
+            sendServ(s, "fire " + std::to_string(x3) + " " + std::to_string(y3) + " " + std::to_string(p3));
             std::string answer = readServ(s);
+            std::cout << "получили от сервера (3Side) "  << answer << std::endl;
             //std::cout << std::endl << "данные от сервера начальные: " << answer;
 
             if (answer != "yes" && answer != "no" && answer != "kill" && answer != "win")
             {
                 answer = readServ(s);
                 std::cout << "Переполучение данных\n";
-            }
+            } else
             if (answer == "yes")   // если попали, но не убили
             {
-                for (int j = 0; j < LengthBigCube; j++) {
-                    Player2[x3][j][p3].setColor(0.5, 0.5, 0.8);
-                    Player2[x3][j][p3].setTransparency(0.11);
+                for (int k = 0; k < LengthBigCube; k++) {
+                    Player2[x3][y3][k].setColor(0.5, 0.5, 0.8);
+                    Player2[x3][y3][k].setTransparency(0.11);
                 }
 
                 Player2[x3][y3][p3].setColor(1, 0, 0);
@@ -375,25 +380,23 @@ void forEnter5FunctionTwo()
                 Player2[x3][y3][p3].setTransparency(0.35);
                 Player2[x3][y3][p3].setIsHitten(3);
                 isPlayer1 = true;
-            }
+            } else
             if (answer == "kill")   // если попали, но не убили
             {
-                for (auto &i : Player2)
-                {
-                    i[yf][z1].setColor(0.5, 0.5, 0.8);
-                    i[yf][z1].setTransparency(0.11);
+                for (int k = 0; k < LengthBigCube; k++) {
+                    Player2[x3][y3][k].setColor(0.5, 0.5, 0.8);
+                    Player2[x3][y3][k].setTransparency(0.11);
                 }
 
-                Player2[p1][yf][z1].setColor(1, 0, 0);
-                Player2[p1][yf][z1].setTransparency(0.35);
-                Player2[p1][yf][z1].setIsHitten(4);
+                Player2[x3][y3][p3].setColor(1, 0, 0);
+                Player2[x3][y3][p3].setTransparency(0.35);
+                Player2[x3][y3][p3].setIsHitten(4);
                 hitThirdSide2();
-            }
+            } else
             if (answer == "win")   // если попали, но не убили
             {
                 end2 = true;
-            }
-            else
+            } else
                 std::cout << "Неверные данные при получение ответа на выстрел (сторона 3)";
             /*} else if (thirdSide && Player2[x3][y3][p3].getHit() == 1)
             {
@@ -432,6 +435,17 @@ void forEnter5FunctionTwo()
             ///написать отправку данных на сервер
 
     }
+
+    for (auto &i : Player1)
+        for (auto &t : i)
+            for (auto &k : t)
+                k.setRed(false);
+
+    for (auto &i : Player2)
+        for (auto &t : i)
+            for (auto &k : t)
+                k.setRed(false);
+
     forEnter = 0;
     p1 = 0;
     yf = 0;
@@ -443,15 +457,6 @@ void forEnter5FunctionTwo()
     y3 = 0;
     p3 = 0;
 
-    for (auto &i : Player1)
-        for (auto &t : i)
-            for (auto &k : t)
-                k.setRed(false);
-
-    for (auto &i : Player2)
-        for (auto &t : i)
-            for (auto &k : t)
-                k.setRed(false);
 }
 
 #endif //INC_3DSEEBUTTLE_FORENTER5_TWOCUBES_H

@@ -144,7 +144,7 @@ void forEnter3Function()
                     {
                         Player2[x2][j][z2].setColor(1, 0, 0);
                         Player2[x2][j][z2].setTransparency(0.35);
-                    }
+                    } else
                     Player2[x2][j][z2].setColor(1, 1, 0);
                 }
                 Player2[x2][0][z2].setTransparency(0.7);
@@ -161,8 +161,8 @@ void forEnter3Function()
                     } else if(Player2[x3][y3][k].getHit() == 4)
                     {
                         Player2[x3][y3][k].setColor(1, 0, 0);
-                        Player2[x2][y3][k].setTransparency(0.35);
-                    }
+                        Player2[x3][y3][k].setTransparency(0.15);
+                    } else
                     Player2[x3][y3][k].setColor(1, 1, 0);
                 }
                 Player2[x3][y3][0].setTransparency(0.7);
