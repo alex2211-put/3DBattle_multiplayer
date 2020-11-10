@@ -193,7 +193,8 @@ class Bot:
                         o -= 1
             else:
                 o = t1[0]
-                while self.my_map[o][t1[1]][t1[2]] == 4 and o < self.len_cube:
+                while o < self.len_cube and self.my_map[o][t1[1]][t1[2]] == 4:
+                    print(o)
                     o += 1
 
                 o -= 1

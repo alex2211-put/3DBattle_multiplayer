@@ -1,8 +1,10 @@
 import asyncio
+import json
+from time import time
+import copy
 from funcs import *
 
 '''
-3) Написать повторное подключение игрока к серверу по причине локального вылета из игры.
 4) Написать восстановление сервера при его неожиданном падении (файл, где хранятся действующие игры).
 5) Написать историю игр (*)
 '''
@@ -35,8 +37,15 @@ class ClientServerProtocol(asyncio.Protocol):
     new_pair_num = [0]
     where = [-2, -2, -2]
     pairs_bots = []
+    time = time()
 
     def connection_made(self, transport):
+        '''
+        if not self.everything:
+            with open('.all_data.json', 'r') as f:
+                if not f:
+                    self.everything = json.load(f)
+                    '''
         self.transport = transport
         answer = str(transport.__hash__()) + '\n'  # записываем хэш пришедшего подключения
         self.everything[str(transport.__hash__())] = [transport]  # создаем ключ с таким хэшом и кидаем связь
@@ -172,6 +181,16 @@ class ClientServerProtocol(asyncio.Protocol):
             print(data)
             print('Такого ключа нет в словаре!!!')
 
+    '''if time() - self.time > 10:
+                self.time = time()
+                with open('.all_data.json', 'w') as f:
+                    new_everything = copy.deepcopy(self.everything.copy())
+                    print(new_everything)
+                    for keys in new_everything:
+                        new_everything[keys][0] = 0
+                    print(new_everything)
+                    print(self.everything)
+                    json.dump(new_everything, f)'''
 
 if __name__ == '__main__':
     run_server('127.0.0.1', 5000)

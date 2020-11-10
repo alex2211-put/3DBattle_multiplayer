@@ -197,7 +197,6 @@ def fire_func(data, everything, pairs, where):
             where_[2] += 1
 
         if hit:  # если корабль убит
-            print(where)
             if not bot:
                 everything[hash_with_who][5] -= 1
                 if everything[hash_with_who][5] == 0:  # если у противника закончились корабли
