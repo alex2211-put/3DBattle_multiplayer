@@ -29,10 +29,12 @@ void socket_starting_work()
             }
         }
         else {
+            std::cout << "not empty" << std::endl;
             if (s != -1) {
                 hash = readServ(s);   /// если файл не пустой, то считываем хэш и ... реализовываем))) потом..
                 sendServ(s, "back " + word);   // отправляем что мы вернулись назад после поломки локальной
                 std::string t = readServ(s);
+                std::cout << t << std::endl;
                 if (t == "no") {
                     fs::remove_all(filename);
                     std::ofstream fout(filename); // создаём ofstream для записи и связываем его с файлом
@@ -98,7 +100,7 @@ void socket_starting_work()
                         for (int i = 0; i <= len; i++)
                             for (int j = 0; j <= len; j++)
                                 for (int k = 0; k <= len; k++) {
-                                    std::cout << int(t[count_map]) - 48;
+                                    //std::cout << int(t[count_map]) - 48;
                                     Player1[i][j][k].setIsHitten(int(t[count_map]) - 48);
                                     count_map++;
                                 }
@@ -120,6 +122,14 @@ void socket_starting_work()
                                     Player2[i][j][k].setIsHitten(int(t[count_map]) - 48);
                                     count_map++;
                                 }
+                    } else if (t == "no")
+                        {}
+                    else
+                    {
+                        s = init_sock();
+
+                        std::cout << "bad" << std::endl;
+                        socket_starting_work();
                     }
                 }
             }

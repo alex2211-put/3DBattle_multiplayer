@@ -152,11 +152,11 @@ class Bot:
         self.my_map[cells[0]][cells[1]][cells[2]] = 4
         t1 = [int(p) for p in cells]
         t2 = None
-        c = [[i, j, k] for i in range(t1[0] - 1, t1[0] + 2, 2) if 0 <= i < self.len_cube
-             for j in range(t1[1] - 1, t1[1] + 2, 2) if 0 <= j < self.len_cube
-             for k in range(t1[2] - 1, t1[2] + 2, 2) if 0 <= k < self.len_cube]
+        c = [[i, j, k] for i in range(t1[0] - 1, t1[0] + 2, ) if 0 <= i < self.len_cube
+             for j in range(t1[1] - 1, t1[1] + 2) if 0 <= j < self.len_cube
+             for k in range(t1[2] - 1, t1[2] + 2) if 0 <= k < self.len_cube]
         for i in c:
-            if self.my_map[i[0]][i[1]][i[2]] == 4:
+            if self.my_map[i[0]][i[1]][i[2]] == 4 and i[0] != t1[0] and i[1] != t1[1] and i[2] != t1[2]:
                 t2 = [i[0], i[1], i[2]]
 
         o = None
@@ -175,7 +175,7 @@ class Bot:
                              for j in range(t1[1] - 1, t1[1] + 2, 2) if 0 <= j < self.len_cube
                              for k in range(o - 1, o + 2, 2) if 0 <= k < self.len_cube]
                         for i in c:
-                            if self.my_map[i[0]][i[1]][i[2]] == 0:
+                            if self.my_map[i[0]][i[1]][i[2]] == 0 or self.my_map[i[0]][i[1]][i[2]] == 2:
                                 self.my_map[i[0]][i[1]][i[2]] = 3
                         o -= 1
                 else:
@@ -189,7 +189,7 @@ class Bot:
                              for j in range(o - 1, o + 2, 2) if 0 <= j < self.len_cube
                              for k in range(t1[2] - 1, t1[2] + 2, 2) if 0 <= k < self.len_cube]
                         for i in c:
-                            if self.my_map[i[0]][i[1]][i[2]] == 0:
+                            if self.my_map[i[0]][i[1]][i[2]] == 0 or self.my_map[i[0]][i[1]][i[2]] == 2:
                                 self.my_map[i[0]][i[1]][i[2]] = 3
                         o -= 1
             else:
@@ -203,10 +203,10 @@ class Bot:
                          for j in range(t1[1] - 1, t1[1] + 2, 2) if 0 <= j < self.len_cube
                          for k in range(t1[2] - 1, t1[2] + 2, 2) if 0 <= k < self.len_cube]
                     for i in c:
-                        if self.my_map[i[0]][i[1]][i[2]] == 0:
+                        if self.my_map[i[0]][i[1]][i[2]] == 0 or self.my_map[i[0]][i[1]][i[2]] == 2:
                             self.my_map[i[0]][i[1]][i[2]] = 3
                     o -= 1
         else:
             for i in c:
-                if self.my_map[i[0]][i[1]][i[2]] == 0:
+                if self.my_map[i[0]][i[1]][i[2]] == 0 or self.my_map[i[0]][i[1]][i[2]] == 2:
                     self.my_map[i[0]][i[1]][i[2]] = 3

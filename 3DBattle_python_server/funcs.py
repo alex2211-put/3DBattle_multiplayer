@@ -211,6 +211,7 @@ def fire_func(data, everything, pairs, where):
                 bot_pack.ships -= 1
                 if bot_pack.ships == 0:
                     everything[data[0]][0].write("win".encode())
+                    everything[data[0]][1] = 'win'
                 else:
                     bot_pack.kill_func([where[0], where[1], where[2]])
                     everything[data[0]][0].write("kill".encode())
