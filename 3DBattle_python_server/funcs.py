@@ -66,7 +66,6 @@ def ready_func(data, everything, pairs):
         everything[data[0]].append(ships)  # число кораблей в словарь
         everything[data[0]].append(bot)  # добавляем комплект бота
     everything[data[0]][0].write('ok'.encode())
-    print(everything[data[0]])
 
 
 def for_bot_fire(data, bot, everything, where):

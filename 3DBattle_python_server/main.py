@@ -134,7 +134,6 @@ class ClientServerProtocol(asyncio.Protocol):
                                     hash_with_who = self.pairs[self.everything[data[2]][4][0]][
                                         1 - self.everything[data[2]][4][1]]
                                 self.everything[data[2]][0].write('fire\n'.encode())
-                                print('write fire, 132')
                                 self.everything[data[2]][0].write(map.encode())
                                 sleep(0.3)
                                 map2 = ''
