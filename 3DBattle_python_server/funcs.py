@@ -253,3 +253,77 @@ def waiting_func(data, everything, where, pairs):
             for_bot_fire(data, everything[data[0]][6], everything, where)
         else:
             everything[data[0]][0].write("no".encode())
+
+
+def back_func(data, everything, pairs):
+    if data[2] in everything:
+        if len(everything[data[2]]) > 2 and \
+                (everything[data[2]][1] == 'win' or everything[data[2]][1] == 'fail'):
+            everything[data[0]][0].write("no".encode())
+        else:
+            everything[data[2]][0] = everything[data[0]][0]
+            del everything[data[0]]
+            if len(everything[data[2]]) > 1:
+                map = ''
+                for i in range(everything[data[2]][3]):
+                    for j in range(everything[data[2]][3]):
+                        for k in range(everything[data[2]][3]):
+                            map += str(everything[data[2]][2][i][j][k])
+                if everything[data[2]][1] == 'ready':  # если он ожидал противника
+                    everything[data[2]][0].write('ready\n'.encode())
+                    everything[data[2]][0].write(map.encode())
+                elif everything[data[2]][1] == 'wait':
+                    if not len(everything[data[2]]) == 7:
+                        hash_with_who = pairs[everything[data[2]][4][0]][
+                            1 - everything[data[2]][4][1]]
+                    everything[data[2]][0].write('wait\n'.encode())
+                    everything[data[2]][0].write(map.encode())
+                    map2 = ''
+                    if not len(everything[data[2]]) == 7:
+                        for i in range(everything[hash_with_who][3]):
+                            for j in range(everything[hash_with_who][3]):
+                                for k in range(everything[hash_with_who][3]):
+                                    if everything[hash_with_who][2][i][j][k] == 1:
+                                        map2 += str(2)
+                                    else:
+                                        map2 += str(everything[hash_with_who][2][i][j][k])
+                    else:
+                        for i in range(everything[data[2]][3]):
+                            for j in range(everything[data[2]][3]):
+                                for k in range(everything[data[2]][3]):
+                                    if everything[data[0]][6].my_map[i][j][k] == 1:
+                                        map2 += str(2)
+                                    else:
+                                        map2 += str(everything[data[0]][6].my_map[i][j][k])
+                    everything[data[2]][0].write(map2.encode())
+                elif everything[data[2]][1] == 'shoots' or everything[data[2]][1] == 'fire_st':
+                    if not len(everything[data[2]]) == 7:
+                        hash_with_who = pairs[everything[data[2]][4][0]][
+                            1 - everything[data[2]][4][1]]
+                    everything[data[2]][0].write('fire\n'.encode())
+                    everything[data[2]][0].write(map.encode())
+                    sleep(0.3)
+                    map2 = ''
+                    if not len(everything[data[2]]) == 7:
+                        for i in range(everything[hash_with_who][3]):
+                            for j in range(everything[hash_with_who][3]):
+                                for k in range(everything[hash_with_who][3]):
+                                    if everything[hash_with_who][2][i][j][k] == 1:
+                                        map2 += str(2)
+                                    else:
+                                        map2 += str(everything[hash_with_who][2][i][j][k])
+                    else:
+                        for i in range(everything[data[2]][3]):
+                            for j in range(everything[data[2]][3]):
+                                for k in range(everything[data[2]][3]):
+                                    if everything[data[2]][6].my_map[i][j][k] == 1:
+                                        map2 += str(2)
+                                    else:
+                                        map2 += str(everything[data[2]][6].my_map[i][j][k])
+                    everything[data[2]][0].write(map2.encode())
+            else:
+                print('not_ready')
+                everything[data[2]][0].write('not_ready\n'.encode())
+
+    else:  # если такого ключа не нашлось
+        everything[data[0]][0].write("no".encode())

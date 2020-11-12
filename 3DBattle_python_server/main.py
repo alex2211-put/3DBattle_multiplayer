@@ -97,78 +97,7 @@ class ClientServerProtocol(asyncio.Protocol):
                     self.everything[data[0]][0].write("no\n".encode())
 
             elif data[1] == 'back':
-                print('back')
-                if data[2] in self.everything:
-                    if len(self.everything[data[2]]) > 2 and \
-                            (self.everything[data[2]][1] == 'win' or self.everything[data[2]][1] == 'fail'):
-                        self.everything[data[0]][0].write("no".encode())
-                    else:
-                        self.everything[data[2]][0] = self.everything[data[0]][0]
-                        del self.everything[data[0]]
-                        if len(self.everything[data[2]]) > 1:
-                            map = ''
-                            for i in range(self.everything[data[2]][3]):
-                                for j in range(self.everything[data[2]][3]):
-                                    for k in range(self.everything[data[2]][3]):
-                                        map += str(self.everything[data[2]][2][i][j][k])
-                            if self.everything[data[2]][1] == 'ready':  # если он ожидал противника
-                                self.everything[data[2]][0].write('ready\n'.encode())
-                                self.everything[data[2]][0].write(map.encode())
-                            elif self.everything[data[2]][1] == 'wait':
-                                if not len(self.everything[data[2]]) == 7:
-                                    hash_with_who = self.pairs[self.everything[data[2]][4][0]][
-                                        1 - self.everything[data[2]][4][1]]
-                                self.everything[data[2]][0].write('wait\n'.encode())
-                                self.everything[data[2]][0].write(map.encode())
-                                map2 = ''
-                                if not len(self.everything[data[2]]) == 7:
-                                    for i in range(self.everything[hash_with_who][3]):
-                                        for j in range(self.everything[hash_with_who][3]):
-                                            for k in range(self.everything[hash_with_who][3]):
-                                                if self.everything[hash_with_who][2][i][j][k] == 1:
-                                                    map2 += str(2)
-                                                else:
-                                                    map2 += str(self.everything[hash_with_who][2][i][j][k])
-                                else:
-                                    for i in range(self.everything[data[2]][3]):
-                                        for j in range(self.everything[data[2]][3]):
-                                            for k in range(self.everything[data[2]][3]):
-                                                if self.everything[data[0]][6].my_map[i][j][k] == 1:
-                                                    map2 += str(2)
-                                                else:
-                                                    map2 += str(self.everything[data[0]][6].my_map[i][j][k])
-                                self.everything[data[2]][0].write(map2.encode())
-                            elif self.everything[data[2]][1] == 'shoots' or self.everything[data[2]][1] == 'fire_st':
-                                if not len(self.everything[data[2]]) == 7:
-                                    hash_with_who = self.pairs[self.everything[data[2]][4][0]][
-                                        1 - self.everything[data[2]][4][1]]
-                                self.everything[data[2]][0].write('fire\n'.encode())
-                                self.everything[data[2]][0].write(map.encode())
-                                sleep(0.3)
-                                map2 = ''
-                                if not len(self.everything[data[2]]) == 7:
-                                    for i in range(self.everything[hash_with_who][3]):
-                                        for j in range(self.everything[hash_with_who][3]):
-                                            for k in range(self.everything[hash_with_who][3]):
-                                                if self.everything[hash_with_who][2][i][j][k] == 1:
-                                                    map2 += str(2)
-                                                else:
-                                                    map2 += str(self.everything[hash_with_who][2][i][j][k])
-                                else:
-                                    for i in range(self.everything[data[2]][3]):
-                                        for j in range(self.everything[data[2]][3]):
-                                            for k in range(self.everything[data[2]][3]):
-                                                if self.everything[data[2]][6].my_map[i][j][k] == 1:
-                                                    map2 += str(2)
-                                                else:
-                                                    map2 += str(self.everything[data[2]][6].my_map[i][j][k])
-                                self.everything[data[2]][0].write(map2.encode())
-                        else:
-                            print('not_ready')
-                            self.everything[data[2]][0].write('not_ready\n'.encode())
-
-                else:  # если такого ключа не нашлось
-                    self.everything[data[0]][0].write("no".encode())
+                back_func(data, self.everything, self.pairs)
 
             elif data[1] == 'end':  # окончание игры клиентом
                 try:
