@@ -97,6 +97,7 @@ void socket_starting_work()
                         std::cout << std::endl;
                         int count_map = 0;
                         int len = int(pow(t.length(), 1. / 3));
+                        std::cout << len << std::endl;
                         for (int i = 0; i <= len; i++)
                             for (int j = 0; j <= len; j++)
                                 for (int k = 0; k <= len; k++) {
@@ -113,7 +114,9 @@ void socket_starting_work()
                         mainmenu = false;
                         forTwoPlayers = 2;
                         isPlayer1 = false;
+                        std::cout << "читаю второй раз" << std::endl;
                         t = readServ(s);
+                        std::cout << "Что-то пришло " << t << std::endl;
                         count_map = 0;
                         len = int(pow(t.length(), 1. / 3));
                         for (int i = 0; i <= len; i++)
@@ -123,7 +126,9 @@ void socket_starting_work()
                                     count_map++;
                                 }
                     } else if (t == "no")
-                        {}
+                        {
+                        std::cout << "I'm here" << std::endl;
+                        }
                     else
                     {
                         s = init_sock();
@@ -199,6 +204,7 @@ void Rotate(int value)
         std::string t;
         if (!end1 && !end2 && !end3)
         {
+            std::cout << "Отправляю ?" << std::endl;
             sendServ(s, "?");
             t = readServ(s);
         }
@@ -262,6 +268,10 @@ void Rotate(int value)
         {
             end3 = true;
             glutPostRedisplay();
+        }
+        else if (t == "no")
+        {
+            std::cout << "Получил no " << std::endl;
         }
     }
 

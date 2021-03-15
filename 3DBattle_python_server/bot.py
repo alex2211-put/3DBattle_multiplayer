@@ -3,6 +3,10 @@ from random import randint
 
 
 class Bot:
+    """
+    A bot that communicates with the client on the server.
+    """
+
     def __init__(self, len_cube):
         self.map_enemy = [[[0 for _ in range(len_cube)] for _ in range(len_cube)] for _ in range(len_cube)]
         with open(".maps.json", 'r') as f:
@@ -26,6 +30,10 @@ class Bot:
         self.fire = False
 
     def fire_func(self):  # стреляет бот
+        """
+        Bot choose 3 cells and remembers it: if they a correct, bot will fire near them
+        :return: list
+        """
         if len(self.hit) == 1:
             r = self.can_fire_hit[randint(0, len(self.can_fire_hit) - 1)]
             self.can_fire_hit.remove(r)
@@ -60,12 +68,17 @@ class Bot:
             self.cells_empty.remove(r)
         except:
             r = self.fire_func()
-        self.map_enemy[i][j][k] = 3  # промахнулись
-        self.i, self.j, self.k = i, j, k  # запоминаем координаты последнего выстрела
+        self.map_enemy[i][j][k] = 3  # missed
+        self.i, self.j, self.k = i, j, k
         return r
 
     def after_hit(self):
-        self.map_enemy[self.i][self.j][self.k] = 4  # попали
+        """
+        After bot has hit an enemy ship, this function should be called.
+        It collects all the cells, where the ship can be located
+        :return: list
+        """
+        self.map_enemy[self.i][self.j][self.k] = 4  # hit
         self.hit.append([self.i, self.j, self.k])
         if not self.can_fire_hit:
             if self.i - 1 >= 0:
@@ -88,7 +101,12 @@ class Bot:
                 pass
         return self.fire_func()
 
-    def kill_enemy(self):  # бот убил корабль противника
+    def kill_enemy(self):  # bot kills the enemy ship
+        """
+        After bot has killed an enemy ship, this function should be called.
+        It remove all the cells that the bot should not shoot at (they are located near the ship)
+        :return: None
+        """
         self.can_fire_hit = []
         self.map_enemy[self.i][self.j][self.k] = 4
         self.hit.append([self.i, self.j, self.k])
@@ -102,7 +120,7 @@ class Bot:
                 for _ in range(counts):
                     self.can_fire_hit.remove([-1, -1, -1])
             except:
-                pass
+                print('Exception 123')
             for i in c:
                 try:
                     self.map_enemy[i[0]][i[1]][i[2]] = 3
@@ -111,7 +129,6 @@ class Bot:
                     pass
         else:
             t1, t2 = self.hit[0], self.hit[1]
-            o = None
             if t1[0] == t2[0]:
                 if t1[1] == t2[1]:
                     o = max([y[2] for y in self.hit])
@@ -148,7 +165,13 @@ class Bot:
                     o -= 1
         self.hit = []
 
-    def kill_func(self, cells):  # когда убили корабль бота
+    def kill_func(self, cells):
+        """
+        After the client has killed the ship of bot, this function should be called.
+        It check all the cells near the ship and marks them
+        :param cells: list
+        :return: None
+        """
         self.my_map[cells[0]][cells[1]][cells[2]] = 4
         t1 = [int(p) for p in cells]
         t2 = None
@@ -158,7 +181,6 @@ class Bot:
         for i in c:
             if self.my_map[i[0]][i[1]][i[2]] == 4 and (i[0] != t1[0] or i[1] != t1[1] or i[2] != t1[2]):
                 t2 = [i[0], i[1], i[2]]
-        o = None
 
         if t2 is not None:
 
@@ -194,7 +216,6 @@ class Bot:
             else:
                 o = t1[0]
                 while o < self.len_cube and self.my_map[o][t1[1]][t1[2]] == 4:
-                    print(o)
                     o += 1
 
                 o -= 1
