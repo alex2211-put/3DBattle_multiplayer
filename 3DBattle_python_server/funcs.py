@@ -59,7 +59,7 @@ def ready_func(data, everything, pairs):
 
 def for_bot_fire(data, bot, everything, where):
     """
-    Bot is firing
+    The bot shoots
     :param where: list
     :param data: list
     :param bot: class Bot
@@ -111,7 +111,7 @@ def for_bot_fire(data, bot, everything, where):
 
 def fire_func(data, everything, pairs, where):
     """
-    Client is firing
+    The client shoots
     :param where: list
     :param data: list
     :param everything: dict
@@ -217,7 +217,7 @@ def waiting_func(data, everything, pairs, where):
 
 def back_func(data, everything, pairs):
     """
-    Client is return on server
+    Client returns on server
     :param data: list
     :param everything: dict
     :param pairs: list
